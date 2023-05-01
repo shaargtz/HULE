@@ -29,7 +29,7 @@ reserved = {
     'regresa' : 'REGRESA',
     'verdad' : 'VERDAD',
     'falso' : 'FALSO',
-    # 'imprime' : 'IMPRIME',
+    'imprime' : 'IMPRIME',
     'sen' : 'SEN',
     'cos' : 'COS',
     'tan' : 'TAN',
@@ -48,7 +48,7 @@ reserved = {
     'poder' : 'PODER',
     'log' : 'LOG',
     'abs' : 'ABS',
-    'secuencia' : 'SECUENCIA'
+    'sec' : 'SEC'
 }
 
 literals = ',;][}{)(=+-*/><=&|'
