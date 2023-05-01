@@ -71,7 +71,7 @@ def p_dec_func(t):
 
 def p_dec_func_t(t):
     '''
-    dec_func_t : FUNC ID '(' param ')' TIPO tipo '{' bloque REGRESA hiper_exp '}' ';'
+    dec_func_t : FUNC ID '(' param ')' TIPO tipo '{' bloque REGRESA hiper_exp ';' '}' ';'
     '''
 
 def p_dec_func_v(t):
@@ -236,6 +236,10 @@ def p_error(t):
 parser = yacc.yacc()
 
 codigo = '''
+func f(cadena letras) tipo ent {
+    regresa 3;
+};
+
 hule() 
 { 
     var ent a, b, c[5];
@@ -243,9 +247,9 @@ hule()
     b = 3;
     si (a < b) 
     {
-        imprime('bbb');
+        f('bbb');
     } sino {
-        imprime('aaa');
+        f('aaa');
     };
 }
 '''
