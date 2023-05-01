@@ -111,12 +111,15 @@ class MaquinaVirtual:
                 # por hacer listas
                 print("sec({mem[operando_1]}, mem[operando_1]}) = ")
             elif operador == 'GOTOF':
+                print("GOTOF {mem[operando_1]} {destino}")
                 if (not mem[operando_1]):
                     contador = destino - 1
             elif operador == 'GOTOV':
+                print("GOTOV {mem[operando_1]} {destino}")
                 if (mem[operando_1]):
                     contador = destino - 1
             elif operador == 'GOTO':
+                print("GOTOF {destino}")
                 contador = destino - 1
             else:
                 print("Operador no reconocido: {operador}")
