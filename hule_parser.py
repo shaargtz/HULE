@@ -1,6 +1,8 @@
 from ply import yacc
 from hule_lexer import tokens
 
+cuadruplos = []
+
 def p_programa(t):
     '''
     programa : dec HULE '(' ')' '{' bloque '}'
@@ -235,7 +237,7 @@ def p_error(t):
 
 parser = yacc.yacc()
 
-codigo = '''
+codigo_1 = '''
 func f(cadena letras) tipo ent {
     regresa 3;
 };
@@ -254,4 +256,14 @@ hule()
 }
 '''
 
-parser.parse(codigo)
+codigo_2 = '''
+hule() 
+{ 
+    var ent a, b, c[5];
+    a = 2;
+    b = 3;
+    a = a + b;
+}
+'''
+
+parser.parse(codigo_1)
