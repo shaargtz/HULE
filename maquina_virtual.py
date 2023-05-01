@@ -2,11 +2,9 @@ import math
 import random
 
 class MaquinaVirtual:
-    def __init__(self, cuadruplos, memoria, variables, funciones):
+    def __init__(self, cuadruplos, memoria):
         self.cuadruplos = cuadruplos
         self.memoria = memoria
-        self.variables = variables
-        self.funciones = funciones
     
     def ejecutar(self):
         contador = 0
