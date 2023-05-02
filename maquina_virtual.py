@@ -1,5 +1,6 @@
 import math
 import random
+from memoria_virtual import VonNeumann
 
 class MaquinaVirtual:
     def __init__(self, cuadruplos, memoria):
@@ -13,7 +14,7 @@ class MaquinaVirtual:
             operando_1 = self.cuadruplos[contador][1]
             operando_2 = self.cuadruplos[contador][2]
             destino = self.cuadruplos[contador][3]
-            mem = self.memoria
+            mem = self.memoria.memoria
             if operador == '+':
                 print("{mem[operando_1]} + {mem[operando_2]} = " + str(mem[operando_1] + mem[operando_2]))
                 mem[destino] = mem[operando_1] + mem[operando_2]
