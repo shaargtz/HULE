@@ -23,3 +23,5 @@ class Variables:
         if (not self.tabla.get(var)):
             self.tabla[var] = (tipo, self.contadores[tipo])
             self.contadores[tipo] = self.contadores[tipo] + 1
+            return self.contadores[tipo]
+        return -1
