@@ -1,5 +1,18 @@
 from ply import yacc
 from hule_lexer import tokens
+from directorio_funciones import DirFunciones
+from cubo_semantico import CuboSemantico
+from memoria_virtual import VonNeumann
+from maquina_virtual import MaquinaVirtual
+
+dir_funciones = DirFunciones()
+cubo_semantico = CuboSemantico()
+memoria = VonNeumann()
+
+num_ctes_ent = 0
+num_temp_ent = 0
+
+funcion_actual = 'global'
 
 cuadruplos = []
 
@@ -18,26 +31,26 @@ def p_dec(t):
 def p_dec_var(t):
     '''
     dec_var : VAR tipo ID dec_var_prima ';'
-            | dec_lista
     '''
+    # hardcoded
+    dir_funciones.directorio[funcion_actual][1].insertar_variable(t[3], t[2])
     
 def p_dec_var_prima(t):
     '''
     dec_var_prima : ',' ID dec_var_prima
-                  | ',' ID dimension dec_lista_prima
                   | nulo
     '''
     
+# por hacer : corregir la declaracion de listas y matrices
+
 def p_dec_lista(t):
     '''
     dec_lista : VAR tipo ID dimension dec_lista_prima ';'
-              | dec_matriz
     '''
     
 def p_dec_lista_prima(t):
     '''
     dec_lista_prima : ',' ID dimension dec_lista_prima
-                    | ',' ID dimension dimension dec_matriz_prima
                     | nulo
     '''
     
@@ -64,6 +77,8 @@ def p_tipo(t):
          | CAR 
          | CADENA
     '''
+    # hardcoded
+    t[0] = t[1]
     
 def p_dec_func(t):
     '''
@@ -75,11 +90,15 @@ def p_dec_func_t(t):
     '''
     dec_func_t : FUNC ID '(' param ')' TIPO tipo '{' bloque REGRESA hiper_exp ';' '}' ';'
     '''
+    # hardcoded
+    dir_funciones.insertar_funcion(t[2], t[7])
 
 def p_dec_func_v(t):
     '''
     dec_func_v : FUNC ID '(' param ')' TIPO VACIO '{' bloque '}' ';'
     '''
+    # hardcoded
+    dir_funciones.insertar_funcion(t[2], 'vacio')
 
 def p_param(t):
     '''
@@ -113,6 +132,8 @@ def p_asig(t):
     '''
     asig : ID '=' hiper_exp ';'
     '''
+    # hardcoded
+    cuadruplos.append([t[2], t[3], -1, dir_funciones.directorio[funcion_actual][1].tabla[t[1]][1]])
 
 def p_ciclo_m(t):
     '''
@@ -157,6 +178,8 @@ def p_hiper_exp(t):
     '''
     hiper_exp : super_exp hiper_exp_prima
     '''
+    # hardcoded
+    t[0] = t[1]
 
 def p_hiper_exp_prima(t):
     '''
@@ -169,6 +192,8 @@ def p_super_exp(t):
     '''
     super_exp : exp super_exp_prima
     '''
+    # hardcoded
+    t[0] = t[1]
 
 def p_super_exp_prima(t):
     '''
@@ -183,6 +208,16 @@ def p_exp(t):
     '''
     exp : term exp_prima
     '''
+    # hardcoded
+    # tengo que regresar el espacio de memoria ya sea
+    # del factor o del temporal que tiene el resultado de la operacion
+    global num_temp_ent
+    if (t[2] != None):
+        cuadruplos.append([t[2][0], t[1], t[2][1], 10000 + num_temp_ent])
+        t[0] = 10000 + num_temp_ent
+        num_temp_ent = num_temp_ent + 1
+    else:
+        t[0] = t[1]
 
 def p_exp_prima(t):
     '''
@@ -190,11 +225,18 @@ def p_exp_prima(t):
               | '-' term
               | nulo
     '''
+    # hardcoded
+    if (t[1] != None):
+        t[0] = [t[1], t[2]]
+    else: 
+        t[0] = None
     
 def p_term(t):
     '''
     term : factor term_prima
     '''
+    # hardcoded
+    t[0] = t[1]
 
 def p_term_prima(t):
     '''
@@ -209,6 +251,8 @@ def p_factor(t):
            | cte
            | var
     '''
+    # hardcoded
+    t[0] = t[1]
 
 def p_cte(t):
     '''
@@ -217,6 +261,11 @@ def p_cte(t):
         | CTE_CAR
         | CTE_CADENA
     '''
+    # hardcoded
+    global num_ctes_ent
+    memoria.cambiar_valor(15000 + num_ctes_ent, int(t[1]))
+    t[0] = 15000 + num_ctes_ent
+    num_ctes_ent += 1
 
 def p_var(t):
     '''
@@ -224,11 +273,14 @@ def p_var(t):
         | ID '[' hiper_exp ']'
         | ID '[' hiper_exp ']' '[' hiper_exp ']'
     '''
+    # hardcoded
+    t[0] = dir_funciones.directorio[funcion_actual][1].tabla[t[1]][1]
 
 def p_nulo(t):
     '''
-    nulo :  
+    nulo :
     '''
+    pass
 
 def p_error(t):
     '''
@@ -259,11 +311,17 @@ hule()
 codigo_2 = '''
 hule() 
 { 
-    var ent a, b, c[5];
+    var ent a;
+    var ent b;
     a = 2;
     b = 3;
     a = a + b;
 }
 '''
 
-parser.parse(codigo_1)
+parser.parse(codigo_2)
+
+print(cuadruplos)
+
+mv = MaquinaVirtual(cuadruplos, memoria)
+mv.ejecutar()
