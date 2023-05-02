@@ -1,6 +1,6 @@
 from tabla_variables import Variables
 
-class Funciones:
+class DirFunciones:
     def __init__(self):
         self.directorio = {
             # nombre : [tipo, tabla de variables]
