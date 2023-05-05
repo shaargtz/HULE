@@ -1,11 +1,11 @@
 class Variables:
-    def __init__(self, tipo):
+    def __init__(self, alcance):
         # nombre : (tipo, direccion)
         self.tabla = {
             'var' : {},
             'temp' : {},
         }
-        if tipo == 'global':
+        if alcance == 'global':
             self.contadores = {
                 'var' : {
                     'ent' : 0000,
@@ -22,7 +22,7 @@ class Variables:
                     'bool' : 9000
                 },
             }
-        elif tipo == 'local':
+        elif alcance == 'local':
             self.contadores = {
                 'var' : {
                     'ent' : 10000,
@@ -40,10 +40,16 @@ class Variables:
                 },
             }
 
-    def insertar(self, var, tipo, alcance):
-        if not self.tabla[alcance].get(var):
-            self.tabla[alcance][var] = (tipo, self.contadores[alcance][tipo])
-            self.contadores[alcance][tipo] = self.contadores[alcance][tipo] + 1
-            return self.contadores[alcance][tipo]
+    def insertar(self, tipo, var=None):
+        if var:
+            if not self.tabla['var'].get(var):
+                self.tabla['var'][var] = (tipo, self.contadores['var'][tipo])
+                self.contadores['var'][tipo] = self.contadores['var'][tipo] + 1
+                return self.contadores['var'][tipo]
+            else:
+                raise Exception("Variable " + var + " definida multiples veces")
         else:
-            raise Exception("Variable " + var + " definida multiples veces")
+            nueva_temp = "t" + str(self.contadores['temp'][tipo] % 1000)
+            self.tabla['temp'][nueva_temp] = (tipo, self.contadores['temp'][tipo])
+            self.contadores['temp'][tipo] = self.contadores['temp'][tipo] + 1
+            return self.contadores['temp'][tipo] - 1
