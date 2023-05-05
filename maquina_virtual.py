@@ -8,12 +8,12 @@ class MaquinaVirtual:
         self.memoria = memoria
     
     def ejecutar(self):
-        contador = 0
-        while (contador < len(self.cuadruplos)):
-            operador = self.cuadruplos[contador][0]
-            operando_1 = self.cuadruplos[contador][1]
-            operando_2 = self.cuadruplos[contador][2]
-            destino = self.cuadruplos[contador][3]
+        apuntador = 0
+        while (apuntador < len(self.cuadruplos)):
+            operador = self.cuadruplos[apuntador][0]
+            operando_1 = self.cuadruplos[apuntador][1]
+            operando_2 = self.cuadruplos[apuntador][2]
+            destino = self.cuadruplos[apuntador][3]
             mem = self.memoria.memoria
             if operador == '+':
                 print("{} + {} = ".format(operando_1, operando_2) + str(mem[operando_1] + mem[operando_2]))
@@ -112,15 +112,15 @@ class MaquinaVirtual:
             elif operador == 'GOTOF':
                 print("GOTOF {} {}".format(operando_1, destino))
                 if (not mem[operando_1]):
-                    contador = destino - 1
+                    apuntador = destino - 1
             elif operador == 'GOTOV':
                 print("GOTOV {} {}".format(operando_1, destino))
                 if (mem[operando_1]):
-                    contador = destino - 1
+                    apuntador = destino - 1
             elif operador == 'GOTO':
-                print("GOTOF {}".format(destino))
-                contador = destino - 1
+                print("GOTO {}".format(destino))
+                apuntador = destino - 1
             else:
                 print("Operador no reconocido: {}".format(operador))
             
-            contador = contador + 1
+            apuntador = apuntador + 1
