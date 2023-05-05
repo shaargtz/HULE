@@ -4,22 +4,39 @@ from directorio_funciones import DirFunciones
 from cubo_semantico import CuboSemantico
 from memoria_virtual import VonNeumann
 from maquina_virtual import MaquinaVirtual
+from tabla_variables import Variables
+from tabla_constantes import Constantes
 
 dir_funciones = DirFunciones()
 cubo_semantico = CuboSemantico()
 memoria = VonNeumann()
+ctes = Constantes()
 
-num_ctes_ent = 0
-num_temp_ent = 0
-
-funcion_actual = 'global'
+func_actual = 'hule'
+tipo_actual = None
 
 cuadruplos = []
 
 def p_programa(t):
     '''
-    programa : dec HULE '(' ')' '{' bloque '}'
+    programa : p1 dec HULE p2 '(' ')' '{' bloque '}'
     '''
+    # borrar todo en memoria al final
+
+def p_p1(t):
+    '''
+    p1 : nulo
+    '''
+    cuadruplos.append(['GOTO', -1, -1, None])
+
+def p_p2(t):
+    '''
+    p2 : nulo
+    '''
+    # indicar al primer cuadruplo donde empieza hule()
+    cuadruplos[0][3] = len(cuadruplos)
+    global func_actual
+    func_actual = 'hule'
 
 def p_dec(t):
     '''
@@ -30,16 +47,38 @@ def p_dec(t):
     
 def p_dec_var(t):
     '''
-    dec_var : VAR tipo ID dec_var_prima ';'
+    dec_var : p3 VAR tipo ID p4 dec_var_prima ';'
     '''
-    # hardcoded
-    dir_funciones.directorio[funcion_actual][1].insertar_variable(t[3], t[2])
+
+def p_p3(t):
+    '''
+    p3 : nulo
+    '''
+    if not dir_funciones.directorio[func_actual][1]:
+        if func_actual == 'hule':
+            dir_funciones.directorio[func_actual][1] = Variables('global')
+        else:
+            dir_funciones.directorio[func_actual][1] = Variables('local')
+
+def p_p4(t):
+    '''
+    p4 : nulo
+    '''
+    global tipo_actual
+    tipo_actual = t[-2]
+    dir_funciones.directorio[func_actual][1].insertar(tipo_actual, t[-1])
     
 def p_dec_var_prima(t):
     '''
-    dec_var_prima : ',' ID dec_var_prima
+    dec_var_prima : ',' ID p5 dec_var_prima
                   | nulo
     '''
+
+def p_p5(t):
+    '''
+    p5 : nulo
+    '''
+    dir_funciones.directorio[func_actual][1].insertar(tipo_actual, t[-1])
     
 # por hacer : corregir la declaracion de listas y matrices
 
@@ -70,6 +109,28 @@ def p_dimension(t):
     dimension : '[' CTE_ENT ']'
     '''
 
+def p_dec_func(t):
+    '''
+    dec_func : FUNC super_tipo ID p6 '(' param ')' '{' bloque '}' ';'
+    '''
+    # borrar tabla de variables al terminar de generar sus cuadruplos
+    # dir_funciones.directorio[func_actual][1] = None
+
+def p_p6(t):
+    '''
+    p6 : nulo
+    '''
+    global func_actual
+    func_actual = t[-1]
+    dir_funciones.insertar(func_actual, t[-2])
+    
+def p_super_tipo(t):
+    '''
+    super_tipo : tipo 
+               | VACIO 
+    '''
+    t[0] = t[1]
+
 def p_tipo(t):
     '''
     tipo : ENT 
@@ -77,40 +138,28 @@ def p_tipo(t):
          | CAR 
          | CADENA
     '''
-    # hardcoded
     t[0] = t[1]
-    
-def p_dec_func(t):
-    '''
-    dec_func : dec_func_t
-             | dec_func_v
-    '''
-
-def p_dec_func_t(t):
-    '''
-    dec_func_t : FUNC ID '(' param ')' TIPO tipo '{' bloque REGRESA hiper_exp ';' '}' ';'
-    '''
-    # hardcoded
-    dir_funciones.insertar_funcion(t[2], t[7])
-
-def p_dec_func_v(t):
-    '''
-    dec_func_v : FUNC ID '(' param ')' TIPO VACIO '{' bloque '}' ';'
-    '''
-    # hardcoded
-    dir_funciones.insertar_funcion(t[2], 'vacio')
 
 def p_param(t):
     '''
-    param : tipo ID param_prima
+    param : tipo ID p7 param_prima
           | nulo
     '''
     
 def p_param_prima(t):
     '''
-    param_prima : ',' tipo ID param_prima
+    param_prima : ',' tipo ID p7 param_prima
                 | nulo
     '''
+
+def p_p7(t):
+    '''
+    p7 : nulo
+    '''
+    if not dir_funciones.directorio[func_actual][1]:
+        dir_funciones.directorio[func_actual][1] = Variables('local')
+    dir_funciones.directorio[func_actual][1].insertar(t[-2], t[-1])
+    dir_funciones.directorio[func_actual][2].append(t[-2])
 
 def p_bloque(t):
     '''
@@ -126,6 +175,7 @@ def p_est(t):
         | ciclo_p
         | cond
         | llama_func
+        | retorno
     '''
     
 def p_asig(t):
@@ -133,7 +183,7 @@ def p_asig(t):
     asig : ID '=' hiper_exp ';'
     '''
     # hardcoded
-    cuadruplos.append([t[2], t[3], -1, dir_funciones.directorio[funcion_actual][1].tabla[t[1]][1]])
+    cuadruplos.append([t[2], t[3], -1, dir_funciones.buscar_variable(func_actual, t[1])])
 
 def p_ciclo_m(t):
     '''
@@ -174,11 +224,15 @@ def p_llama_param_prima(t):
                       | nulo
     '''
 
+def p_retorno(t):
+    '''
+    retorno : REGRESA hiper_exp
+    '''
+
 def p_hiper_exp(t):
     '''
     hiper_exp : super_exp hiper_exp_prima
     '''
-    # hardcoded
     t[0] = t[1]
 
 def p_hiper_exp_prima(t):
@@ -192,7 +246,6 @@ def p_super_exp(t):
     '''
     super_exp : exp super_exp_prima
     '''
-    # hardcoded
     t[0] = t[1]
 
 def p_super_exp_prima(t):
@@ -208,14 +261,15 @@ def p_exp(t):
     '''
     exp : term exp_prima
     '''
-    # hardcoded
+    # hardcoded el tipo
+
     # tengo que regresar el espacio de memoria ya sea
     # del factor o del temporal que tiene el resultado de la operacion
-    global num_temp_ent
-    if (t[2] != None):
-        cuadruplos.append([t[2][0], t[1], t[2][1], 10000 + num_temp_ent])
-        t[0] = 10000 + num_temp_ent
-        num_temp_ent = num_temp_ent + 1
+   
+    if t[2]:
+        temp = dir_funciones.directorio[func_actual][1].insertar('ent')
+        cuadruplos.append([t[2][0], t[1], t[2][1], temp])
+        t[0] = temp
     else:
         t[0] = t[1]
 
@@ -225,8 +279,7 @@ def p_exp_prima(t):
               | '-' term
               | nulo
     '''
-    # hardcoded
-    if (t[1] != None):
+    if t[1]:
         t[0] = [t[1], t[2]]
     else: 
         t[0] = None
@@ -235,7 +288,6 @@ def p_term(t):
     '''
     term : factor term_prima
     '''
-    # hardcoded
     t[0] = t[1]
 
 def p_term_prima(t):
@@ -251,7 +303,6 @@ def p_factor(t):
            | cte
            | var
     '''
-    # hardcoded
     t[0] = t[1]
 
 def p_cte(t):
@@ -261,11 +312,8 @@ def p_cte(t):
         | CTE_CAR
         | CTE_CADENA
     '''
-    # hardcoded
-    global num_ctes_ent
-    memoria.cambiar_valor(15000 + num_ctes_ent, int(t[1]))
-    t[0] = 15000 + num_ctes_ent
-    num_ctes_ent += 1
+    # hardcoded el tipo
+    t[0] = ctes.insertar(t[1], 'ent')
 
 def p_var(t):
     '''
@@ -274,7 +322,7 @@ def p_var(t):
         | ID '[' hiper_exp ']' '[' hiper_exp ']'
     '''
     # hardcoded
-    t[0] = dir_funciones.directorio[funcion_actual][1].tabla[t[1]][1]
+    t[0] = dir_funciones.buscar_variable(func_actual, t[1])
 
 def p_nulo(t):
     '''
@@ -285,17 +333,19 @@ def p_nulo(t):
 def p_error(t):
     '''
     '''
-    print("error en token: " + str(t))
+    raise Exception("Error en linea " + str(t.lineno))
 
 parser = yacc.yacc()
 
 codigo_1 = '''
-func f(cadena letras) tipo ent {
-    regresa 3;
+func ent f(flot a, flot b) {
+    var flot k;
+    var flot l;
+    l = a - 5;
+    k = l * b;
 };
-
 hule() 
-{ 
+{
     var ent a, b, c[5];
     a = 2;
     b = 3;
@@ -321,7 +371,7 @@ hule()
 
 parser.parse(codigo_2)
 
-print(cuadruplos)
-
-mv = MaquinaVirtual(cuadruplos, memoria)
-mv.ejecutar()
+for i in cuadruplos:
+    print(i)
+print(dir_funciones.directorio['hule'][1].tabla)
+print(ctes.tabla)
