@@ -1,13 +1,13 @@
 class DirFunciones:
     def __init__(self):
         self.directorio = {
-            # nombre : [tipo, tabla de variables, parametros]
-            'hule' : ['void', None, []]
+            # nombre : [tipo, variables, parametros, memoria, cuadruplo, return]
+            'hule' : ['void', None, [], {}, None, None]
         }
     
     def insertar(self, func, tipo):
         if not self.directorio.get(func):
-            self.directorio[func] = [tipo, None, []]
+            self.directorio[func] = [tipo, None, [], {}, None, None]
         else:
             raise Exception("Funcion " + func + " definida multiples veces")
         
