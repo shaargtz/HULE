@@ -45,4 +45,7 @@ class CuboSemantico:
 
     def emparejar_tipo(self, tupla):
         tipo = self.cubo.get(tupla)
-        return tipo if tipo else 'incompatibles'
+        if tipo:
+            return tipo
+        else:
+            raise Exception("Tipos incompatibles: " + tupla[1] + " " + tupla[0] + " " + tupla[2])
