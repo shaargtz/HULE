@@ -6,11 +6,16 @@ from memoria_virtual import VonNeumann
 from maquina_virtual import MaquinaVirtual
 from tabla_variables import Variables
 from tabla_constantes import Constantes
+from utilidad import *
 
 dir_funciones = DirFunciones()
 cubo_semantico = CuboSemantico()
 memoria = VonNeumann()
 ctes = Constantes()
+
+pila_operadores = []
+pila_saltos = []
+pila_tipos = []
 
 func_actual = 'hule'
 tipo_actual = None
@@ -22,6 +27,7 @@ def p_programa(t):
     programa : p1 dec HULE p2 '(' ')' '{' bloque '}'
     '''
     # borrar todo en memoria al final
+    cuadruplos.append('FIN', -1, -1, -1)
 
 def p_p1(t):
     '''
@@ -44,7 +50,7 @@ def p_dec(t):
         | dec_func dec
         | nulo
     '''
-    
+
 def p_dec_var(t):
     '''
     dec_var : p3 VAR tipo ID p4 dec_var_prima ';'
@@ -137,6 +143,7 @@ def p_tipo(t):
          | FLOT 
          | CAR 
          | CADENA
+         | BOOL
     '''
     t[0] = t[1]
 
@@ -182,13 +189,34 @@ def p_asig(t):
     '''
     asig : ID '=' hiper_exp ';'
     '''
-    # hardcoded
     cuadruplos.append([t[2], t[3], -1, dir_funciones.buscar_variable(func_actual, t[1])])
 
 def p_ciclo_m(t):
     '''
-    ciclo_m : MIENTRAS '(' hiper_exp ')' '{' bloque '}' ';'
+    ciclo_m : MIENTRAS p11 '(' hiper_exp ')' p12 '{' bloque '}' ';'
     '''
+    fin_ciclo = pila_saltos.pop()
+    retorno = pila_saltos.pop()
+    cuadruplos.append(['GOTO', -1, -1, retorno])
+    cuadruplos[fin_ciclo][3] = len(cuadruplos)
+
+def p_p11(t):
+    '''
+    p11 : nulo
+    '''
+    pila_saltos.append(len(cuadruplos))
+
+def p_p12(t):
+    '''
+    p12 : nulo
+    '''
+    tipo_exp = pila_tipos.pop()
+    if tipo_exp != 'bool':
+        raise Exception("Ciclo MIENTRAS esperaba una expresion bool y encontro " + tipo_exp)
+    else:
+        resultado = pila_operadores.pop()
+        cuadruplos.append(['GOTOF', resultado, -1, None])
+        pila_saltos.append(len(cuadruplos) - 1)
 
 def p_ciclo_p(t):
     '''
@@ -197,18 +225,41 @@ def p_ciclo_p(t):
 
 def p_cond(t):
     '''
-    cond : SI '(' hiper_exp ')' '{' bloque '}' sino ';'
+    cond : SI '(' hiper_exp ')' p9 '{' bloque '}' sino ';'
     '''
+    fin_cond = pila_saltos.pop()
+    cuadruplos[fin_cond][3] = len(cuadruplos)
+
+def p_p9(t):
+    '''
+    p9 : nulo
+    '''
+    tipo_exp = checar_tipo_memoria(t[-2])
+    if tipo_exp != 'bool':
+        raise Exception("Condicion SI esperaba una expresion bool y encontro " + tipo_exp)
+    else:
+        resultado = pila_operadores.pop()
+        cuadruplos.append(['GOTOF', resultado, -1, None])
+        pila_saltos.append(len(cuadruplos) - 1)
 
 def p_sino(t):
     '''
-    sino : SINO '{' bloque '}'
+    sino : SINO p10 '{' bloque '}'
          | nulo
     '''
     
-def p_llama_func(t):
+def p_p10(t):
     '''
-    llama_func : ID '(' llama_param ')' ';'
+    p10 : nulo
+    '''
+    cuadruplos.append(['GOTO', -1, -1, None])
+    falso = pila_saltos.pop()
+    pila_saltos.append(len(cuadruplos) - 1)
+    cuadruplos[falso][3] = len(cuadruplos)
+
+def p_llama_func_est(t):
+    '''
+    llama_func_est : ID '(' llama_param ')' ';'
     '''
 
 def p_llama_param(t):
@@ -233,7 +284,15 @@ def p_hiper_exp(t):
     '''
     hiper_exp : super_exp hiper_exp_prima
     '''
-    t[0] = t[1]
+    if t[2]:
+        tipo1 = checar_tipo_memoria(t[1])
+        tipo2 = checar_tipo_memoria(t[2][1])
+        tipo_temp = cubo_semantico.emparejar_tipo((t[2][0], tipo1, tipo2))
+        temp = dir_funciones.directorio[func_actual][1].insertar(tipo_temp)
+        cuadruplos.append([t[2][0], t[1], t[2][1], temp])
+        t[0] = temp
+    else:
+        t[0] = t[1]
 
 def p_hiper_exp_prima(t):
     '''
@@ -241,12 +300,22 @@ def p_hiper_exp_prima(t):
                     | '|' super_exp
                     | nulo
     '''
+    if t[1]:
+        t[0] = [t[1], t[2]]
     
 def p_super_exp(t):
     '''
     super_exp : exp super_exp_prima
     '''
-    t[0] = t[1]
+    if t[2]:
+        tipo1 = checar_tipo_memoria(t[1])
+        tipo2 = checar_tipo_memoria(t[2][1])
+        tipo_temp = cubo_semantico.emparejar_tipo((t[2][0], tipo1, tipo2))
+        temp = dir_funciones.directorio[func_actual][1].insertar(tipo_temp)
+        cuadruplos.append([t[2][0], t[1], t[2][1], temp])
+        t[0] = temp
+    else:
+        t[0] = t[1]
 
 def p_super_exp_prima(t):
     '''
@@ -256,18 +325,18 @@ def p_super_exp_prima(t):
                     | DIFERENTE_QUE exp
                     | nulo
     '''
+    if t[1]:
+        t[0] = [t[1], t[2]]
     
 def p_exp(t):
     '''
     exp : term exp_prima
     '''
-    # hardcoded el tipo
-
-    # tengo que regresar el espacio de memoria ya sea
-    # del factor o del temporal que tiene el resultado de la operacion
-   
     if t[2]:
-        temp = dir_funciones.directorio[func_actual][1].insertar('ent')
+        tipo1 = checar_tipo_memoria(t[1])
+        tipo2 = checar_tipo_memoria(t[2][1])
+        tipo_temp = cubo_semantico.emparejar_tipo((t[2][0], tipo1, tipo2))
+        temp = dir_funciones.directorio[func_actual][1].insertar(tipo_temp)
         cuadruplos.append([t[2][0], t[1], t[2][1], temp])
         t[0] = temp
     else:
@@ -281,14 +350,20 @@ def p_exp_prima(t):
     '''
     if t[1]:
         t[0] = [t[1], t[2]]
-    else: 
-        t[0] = None
     
 def p_term(t):
     '''
     term : factor term_prima
     '''
-    t[0] = t[1]
+    if t[2]:
+        tipo1 = checar_tipo_memoria(t[1])
+        tipo2 = checar_tipo_memoria(t[2][1])
+        tipo_temp = cubo_semantico.emparejar_tipo((t[2][0], tipo1, tipo2))
+        temp = dir_funciones.directorio[func_actual][1].insertar(tipo_temp)
+        cuadruplos.append([t[2][0], t[1], t[2][1], temp])
+        t[0] = temp
+    else:
+        t[0] = t[1]
 
 def p_term_prima(t):
     '''
@@ -296,24 +371,61 @@ def p_term_prima(t):
                | '/' factor
                | nulo
     '''
+    if t[1]:
+        t[0] = [t[1], t[2]]
 
 def p_factor(t):
     '''
-    factor : llama_func
+    factor : llama_func_exp
            | cte
            | var
     '''
+    # no funciona la llamada de funcion
     t[0] = t[1]
+
+def p_llama_func_est(t):
+    '''
+    llama_func_est : ID '(' llama_param ')'
+    '''
 
 def p_cte(t):
     '''
-    cte : CTE_ENT
-        | CTE_FLOT
-        | CTE_CAR
-        | CTE_CADENA
+    cte : CTE_ENT p8_1
+        | CTE_FLOT p8_2
+        | CTE_CAR p8_3
+        | CTE_CADENA p8_4
     '''
-    # hardcoded el tipo
-    t[0] = ctes.insertar(t[1], 'ent')
+    t[0] = ctes.insertar(t[1], tipo_actual)
+
+# checar si usare constantes booleanas
+
+def p_p8_1(t):
+    '''
+    p8_1 : nulo
+    '''
+    global tipo_actual
+    tipo_actual = 'ent'
+
+def p_p8_2(t):
+    '''
+    p8_2 : nulo
+    '''
+    global tipo_actual
+    tipo_actual = 'flot'
+
+def p_p8_3(t):
+    '''
+    p8_3 : nulo
+    '''
+    global tipo_actual
+    tipo_actual = 'car'
+
+def p_p8_4(t):
+    '''
+    p8_4 : nulo
+    '''
+    global tipo_actual
+    tipo_actual = 'cadena'
 
 def p_var(t):
     '''
@@ -321,7 +433,7 @@ def p_var(t):
         | ID '[' hiper_exp ']'
         | ID '[' hiper_exp ']' '[' hiper_exp ']'
     '''
-    # hardcoded
+    # hardcoded para unicamente la primer regla
     t[0] = dir_funciones.buscar_variable(func_actual, t[1])
 
 def p_nulo(t):
@@ -359,13 +471,22 @@ hule()
 '''
 
 codigo_2 = '''
+func ent f(flot a, flot b) {
+    var flot k;
+    var flot l;
+    l = a - 5;
+    k = l * b;
+};
 hule() 
 { 
-    var ent a;
-    var ent b;
+    var ent a, b;
+    var flot x;
+    var bool w;
     a = 2;
     b = 3;
     a = a + b;
+    x = b * 1.5;
+    w = x > a;
 }
 '''
 
