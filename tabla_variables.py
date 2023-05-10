@@ -49,7 +49,7 @@ class Variables:
             else:
                 raise Exception("Variable " + var + " definida multiples veces")
         else:
-            nueva_temp = "t" + str(self.contadores['temp'][tipo] % 1000)
+            nueva_temp = tipo + str(self.contadores['temp'][tipo] % 1000)
             self.tabla['temp'][nueva_temp] = (tipo, self.contadores['temp'][tipo])
             self.contadores['temp'][tipo] = self.contadores['temp'][tipo] + 1
             return self.contadores['temp'][tipo] - 1
