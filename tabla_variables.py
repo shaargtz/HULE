@@ -44,12 +44,12 @@ class Variables:
         if var:
             if not self.tabla['var'].get(var):
                 self.tabla['var'][var] = (tipo, self.contadores['var'][tipo])
-                self.contadores['var'][tipo] = self.contadores['var'][tipo] + 1
-                return self.contadores['var'][tipo]
+                self.contadores['var'][tipo] += 1
+                return self.contadores['var'][tipo] - 1
             else:
                 raise Exception("Variable " + var + " definida multiples veces")
         else:
             nueva_temp = tipo + str(self.contadores['temp'][tipo] % 1000)
             self.tabla['temp'][nueva_temp] = (tipo, self.contadores['temp'][tipo])
-            self.contadores['temp'][tipo] = self.contadores['temp'][tipo] + 1
+            self.contadores['temp'][tipo] += 1
             return self.contadores['temp'][tipo] - 1
