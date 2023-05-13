@@ -2,11 +2,8 @@ from ply import yacc
 from hule_lexer import tokens
 from directorio_funciones import DirFunciones
 from cubo_semantico import CuboSemantico
-from maquina_virtual import MaquinaVirtual
-from tabla_variables import Variables
 from tabla_constantes import Constantes
 from utilidad import *
-import json
 import pprint
 
 dir_funciones = DirFunciones()
@@ -19,13 +16,15 @@ pila_saltos = []
 pila_tipos = []
 pila_func = []
 
+cont_param = [0, 0]
+
 cuadruplos = []
 
 def p_programa(t):
     '''
     programa : p1 dec HULE p2 '(' ')' '{' bloque '}'
     '''
-    # borrar todo en memoria al final
+    # todo: borrar todo en memoria al final
     cuadruplos.append(['ENDPROG', -1, -1, -1])
 
 def p_p1(t):
@@ -39,7 +38,6 @@ def p_p2(t):
     '''
     p2 : nulo
     '''
-    # indicar al primer cuadruplo donde empieza hule()
     cuadruplos[0][3] = len(cuadruplos)
 
 def p_dec(t):
@@ -50,6 +48,7 @@ def p_dec(t):
     '''
 
 # puedo usar variables globales en una funcion?
+# diferenciar entre globales y locales de hule() ?
 
 def p_dec_var(t):
     '''
@@ -130,6 +129,10 @@ def p_p6(t):
     '''
     pila_func.append(t[-1])
     dir_funciones.insertar_funcion(pila_func[-1], t[-2])
+    if t[-2] != 'vacia':
+        if not dir_funciones.tiene_tabla_var('hule'):
+            dir_funciones.insertar_tabla_var('hule', 'local')
+        dir_funciones.insertar_variable('hule', t[-2], '_' + t[-1])
 
 def p_p16(t):
     '''
@@ -140,7 +143,7 @@ def p_p16(t):
 def p_super_tipo(t):
     '''
     super_tipo : tipo 
-               | VACIO 
+               | VACIA 
     '''
     t[0] = t[1]
 
@@ -172,8 +175,7 @@ def p_p7(t):
     '''
     if not dir_funciones.tiene_tabla_var(pila_func[-1]):
         dir_funciones.insertar_tabla_var(pila_func[-1], 'local')
-    dir_funciones.insertar_variable(pila_func[-1], t[-2], t[-1])
-    dir_funciones.insertar_parametro(pila_func[-1], t[-2])
+    dir_funciones.insertar_parametro(pila_func[-1], t[-2], t[-1])
 
 def p_bloque(t):
     '''
@@ -194,12 +196,12 @@ def p_est(t):
     
 def p_asig(t):
     '''
-    asig : ID '=' hiper_exp ';'
+    asig : var '=' hiper_exp ';'
     '''
-    op_izq = dir_funciones.buscar_variable(pila_func[-1], t[1])
-    tipo_izq = checar_tipo_memoria(op_izq)
     op_der = pila_o.pop()
     tipo_der = pila_tipos.pop()
+    op_izq = pila_o.pop()
+    tipo_izq = pila_tipos.pop()
     if (tipo_izq != tipo_der):
         raise Exception("Asignacion incompatible: " + tipo_izq + " = " + tipo_der)
     cuadruplos.append([t[2], op_der, -1, op_izq])
@@ -234,6 +236,7 @@ def p_ciclo_p(t):
     '''
     ciclo_p : POR '(' ID EN ID ')' '{' bloque '}' ';'
     '''
+    # hasta que haga listas
 
 def p_cond(t):
     '''
@@ -270,43 +273,8 @@ def p_p10(t):
 
 def p_llama_func_est(t):
     '''
-    llama_func_est : ID p15 '(' llama_param ')' ';'
+    llama_func_est : llama_func_exp ';'
     '''
-    # todo: parametros gosub
-    cuadruplos.append(['GOSUB', None, None, None])
-    pila_func.pop()
-
-def p_p15(t):
-    '''
-    p15 : nulo
-    '''
-    func = dir_funciones.directorio.get(t[-1])
-    if func:
-        pila_func.append(t[-1])
-        mem = func[3]['total']
-        cuadruplos.append(['ERA', mem, -1, -1])
-    else:
-        raise Exception("Funcion " + t[-1] + " no esta definida")
-
-def p_llama_param(t):
-    '''
-    llama_param : ID llama_param_prima
-                | cte llama_param_prima
-                | p17 nulo
-    '''
-
-def p_llama_param_prima(t):
-    '''
-    llama_param_prima : ',' ID llama_param_prima
-                      | nulo
-    '''
-
-def p_p17(t):
-    '''
-    p17 : nulo
-    '''
-    if pila_tipos[-1] != 'vacio':
-        raise Exception("Funcion " + pila_func[-1] + " requiere parametros y no se llamaron")
 
 def p_retorno(t):
     '''
@@ -423,11 +391,55 @@ def p_factor(t):
 
 def p_llama_func_exp(t):
     '''
-    llama_func_exp : ID '(' llama_param ')'
+    llama_func_exp : ID p15 '(' arg ')'
     '''
+    if cont_param[0] < cont_param[1]:
+        raise Exception("Funcion " + t[1] + " fue llamada con menos argumentos de los requeridos")
     # todo: parametros gosub
     cuadruplos.append(['GOSUB', None, None, None])
     pila_func.pop()
+    cont_param[0] = 0
+    cont_param[1] = 0
+
+def p_p15(t):
+    '''
+    p15 : nulo
+    '''
+    global cont_param
+    func = dir_funciones.directorio.get(t[-1])
+    if func:
+        pila_func.append(t[-1])
+        mem = func[3][0]['total']
+        cuadruplos.append(['ERA', mem, -1, -1])
+        cont_param = [0, len(func[2])]
+    else:
+        raise Exception("Funcion " + t[-1] + " no esta definida")
+
+def p_arg(t):
+    '''
+    arg : var p13 arg_prima
+        | cte p13 arg_prima
+        | nulo
+    '''
+
+def p_arg_prima(t):
+    '''
+    arg_prima : ',' var p13 arg_prima
+              | ',' cte p13 arg_prima
+              | nulo
+    '''
+
+def p_p13(t):
+    '''
+    p13 : nulo
+    '''
+    if cont_param[0] == cont_param[1]:
+        raise Exception("Funcion " + pila_func[-1] + " fue llamada con mas argumentos de los requeridos")
+    arg = pila_o.pop()
+    tipo_arg = pila_tipos.pop()
+    direccion = dir_funciones.comparar_parametro(pila_func[-1], cont_param[0], tipo_arg)
+    cuadruplos.append(['PARAM', arg, -1, direccion])
+    cont_param[0] += 1
 
 def p_cte(t):
     '''
@@ -472,9 +484,9 @@ def p_var(t):
         | ID '[' hiper_exp ']' '[' hiper_exp ']'
     '''
     # hardcoded para unicamente la primer regla
-    mem = dir_funciones.buscar_variable(pila_func[-1], t[1])
-    pila_o.append(mem)
-    pila_tipos.append(checar_tipo_memoria(mem))
+    direccion = dir_funciones.buscar_variable(pila_func[-1], t[1], glob=True)
+    pila_o.append(direccion)
+    pila_tipos.append(checar_tipo_memoria(direccion))
 
 def p_nulo(t):
     '''
@@ -511,24 +523,20 @@ hule()
 '''
 
 codigo_2 = '''
+func ent f(flot a, flot b) {
+    var flot k;
+    var flot l;
+    l = a - 5;
+    k = l * b;
+};
 hule() 
 { 
     var ent a, b;
     var flot c;
-    var bool d;
     a = 2;
     b = 3;
     a = a + b;
-    c = b * 1.5;
-    d = a > c;
-    si (d) {
-        a = b - 5;
-    } sino {
-        c = a * 0.6;
-    };
-    mientras (b < c) {
-        b = b + 2;
-    };
+    f(c, 4.2);
 }
 '''
 
@@ -537,4 +545,5 @@ parser.parse(codigo_2)
 pp = pprint.PrettyPrinter(indent=4)
 pp.pprint(cuadruplos)
 pp.pprint(dir_funciones.directorio['hule'][1].tabla)
+pp.pprint(dir_funciones.directorio['f'][1].tabla)
 pp.pprint(ctes.tabla)
