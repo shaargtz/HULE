@@ -26,7 +26,7 @@ class DirFunciones:
         self.directorio[func][1] = Variables(alcance)
         
     def insertar_variable(self, func, tipo, var=None):
-        self.directorio[func][1].insertar(tipo, var)
+        return self.directorio[func][1].insertar(tipo, var)
 
     def insertar_parametro(self, func, tipo):
         self.directorio[func][2].append(tipo)
