@@ -10,3 +10,6 @@ Se genera el directorio de funciones con su tabla de variables correspondiente, 
 <br>
 Se generan cuadruplos de operaciones aritmeticas y booleanas, condiciones y ciclos.
 Tambien se generan los cuadruplos correspondientes a las funciones.
+<br>
+<br>
+Para ejecutarlo solo se debe correr `python3 hule_parser.py`
