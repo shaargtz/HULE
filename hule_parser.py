@@ -6,6 +6,8 @@ from maquina_virtual import MaquinaVirtual
 from tabla_variables import Variables
 from tabla_constantes import Constantes
 from utilidad import *
+import json
+import pprint
 
 dir_funciones = DirFunciones()
 cubo_semantico = CuboSemantico()
@@ -221,11 +223,11 @@ def p_p12(t):
     '''
     p12 : nulo
     '''
-    tipo_exp = checar_tipo_memoria(t[-2])
+    tipo_exp = pila_tipos.pop()
     if tipo_exp != 'bool':
         raise Exception("Ciclo MIENTRAS esperaba una expresion bool y encontro " + tipo_exp)
     else:
-        cuadruplos.append(['GOTOF', t[-2], -1, None])
+        cuadruplos.append(['GOTOF', pila_o.pop(), -1, None])
         pila_saltos.append(len(cuadruplos) - 1)
 
 def p_ciclo_p(t):
@@ -513,21 +515,26 @@ hule()
 { 
     var ent a, b;
     var flot c;
+    var bool d;
     a = 2;
     b = 3;
     a = a + b;
     c = b * 1.5;
-    si (a > c) {
+    d = a > c;
+    si (d) {
         a = b - 5;
     } sino {
         c = a * 0.6;
+    };
+    mientras (b < c) {
+        b = b + 2;
     };
 }
 '''
 
 parser.parse(codigo_2)
 
-for i in cuadruplos:
-    print(i)
-print(dir_funciones.directorio['hule'][1].tabla)
-print(ctes.tabla)
+pp = pprint.PrettyPrinter(indent=4)
+pp.pprint(cuadruplos)
+pp.pprint(dir_funciones.directorio['hule'][1].tabla)
+pp.pprint(ctes.tabla)

@@ -14,7 +14,7 @@ class Constantes:
     def insertar(self, var, tipo):
         dir = self.tabla.get(var)
         if dir:
-            return dir
+            return dir[1]
         else:
             self.tabla[var] = (tipo, self.contadores[tipo])
             self.contadores[tipo] = self.contadores[tipo] + 1
