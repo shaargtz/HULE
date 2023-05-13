@@ -244,11 +244,11 @@ def p_p9(t):
     '''
     p9 : nulo
     '''
-    tipo_exp = checar_tipo_memoria(t[-2])
+    tipo_exp = pila_tipos.pop()
     if tipo_exp != 'bool':
         raise Exception("Condicion SI esperaba una expresion bool y encontro " + tipo_exp)
     else:
-        cuadruplos.append(['GOTOF', t[-2], -1, None])
+        cuadruplos.append(['GOTOF', pila_o.pop(), -1, None])
         pila_saltos.append(len(cuadruplos) - 1)
 
 def p_sino(t):
@@ -516,7 +516,12 @@ hule()
     a = 2;
     b = 3;
     a = a + b;
-    c = a * 1.5;
+    c = b * 1.5;
+    si (a > c) {
+        a = b - 5;
+    } sino {
+        c = a * 0.6;
+    };
 }
 '''
 
