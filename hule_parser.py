@@ -533,9 +533,19 @@ hule()
 { 
     var ent a, b;
     var flot c;
+    var bool d;
     a = 2;
     b = 3;
     a = a + b;
+    c = a * 4.5;
+    d = a > b | a > c;
+    mientras (c > b) {
+        si (d) {
+            c = c - 1;
+        } sino {
+            c = c - 2;
+        };
+    };
     f(c, 4.2);
 }
 '''
