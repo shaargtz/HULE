@@ -24,7 +24,7 @@ def p_programa(t):
     programa : p1 dec HULE p2 '(' ')' '{' bloque '}'
     '''
     # borrar todo en memoria al final
-    cuadruplos.append('ENDPROG', -1, -1, -1)
+    cuadruplos.append(['ENDPROG', -1, -1, -1])
 
 def p_p1(t):
     '''
@@ -53,12 +53,13 @@ def p_dec_var(t):
     '''
     dec_var : p3 VAR tipo ID p4 dec_var_prima ';'
     '''
+    pila_tipos.pop()
 
 def p_p3(t):
     '''
     p3 : nulo
     '''
-    if not dir_funciones.tiene_tabla_var():
+    if not dir_funciones.tiene_tabla_var(pila_func[-1]):
         if pila_func[-1] == 'hule':
             dir_funciones.insertar_tabla_var(pila_func[-1], 'global')
         else:
@@ -126,7 +127,7 @@ def p_p6(t):
     p6 : nulo
     '''
     pila_func.append(t[-1])
-    dir_funciones.insertar(pila_func[-1], t[-2])
+    dir_funciones.insertar_funcion(pila_func[-1], t[-2])
 
 def p_p16(t):
     '''
@@ -167,10 +168,10 @@ def p_p7(t):
     '''
     p7 : nulo
     '''
-    if not dir_funciones.tiene_tabla_var():
+    if not dir_funciones.tiene_tabla_var(pila_func[-1]):
         dir_funciones.insertar_tabla_var(pila_func[-1], 'local')
     dir_funciones.insertar_variable(pila_func[-1], t[-2], t[-1])
-    dir_funciones.insertar_parametro(t[-2])
+    dir_funciones.insertar_parametro(pila_func[-1], t[-2])
 
 def p_bloque(t):
     '''
@@ -193,7 +194,13 @@ def p_asig(t):
     '''
     asig : ID '=' hiper_exp ';'
     '''
-    cuadruplos.append([t[2], t[3], -1, dir_funciones.buscar_variable(pila_func[-1], t[1])])
+    op_izq = dir_funciones.buscar_variable(pila_func[-1], t[1])
+    tipo_izq = checar_tipo_memoria(op_izq)
+    op_der = pila_o.pop()
+    tipo_der = pila_tipos.pop()
+    if (tipo_izq != tipo_der):
+        raise Exception("Asignacion incompatible: " + tipo_izq + " = " + tipo_der)
+    cuadruplos.append([t[2], op_der, -1, op_izq])
 
 def p_ciclo_m(t):
     '''
@@ -273,7 +280,6 @@ def p_p15(t):
     '''
     func = dir_funciones.directorio.get(t[-1])
     if func:
-        pila_tipos.append(func[0])
         pila_func.append(t[-1])
         mem = func[3]['total']
         cuadruplos.append(['ERA', mem, -1, -1])
@@ -287,18 +293,18 @@ def p_llama_param(t):
                 | p17 nulo
     '''
 
+def p_llama_param_prima(t):
+    '''
+    llama_param_prima : ',' ID llama_param_prima
+                      | nulo
+    '''
+
 def p_p17(t):
     '''
     p17 : nulo
     '''
     if pila_tipos[-1] != 'vacio':
         raise Exception("Funcion " + pila_func[-1] + " requiere parametros y no se llamaron")
-
-def p_llama_param_prima(t):
-    '''
-    llama_param_prima : ',' ID llama_param_prima
-                      | nulo
-    '''
 
 def p_retorno(t):
     '''
@@ -307,19 +313,7 @@ def p_retorno(t):
 
 def p_hiper_exp(t):
     '''
-    hiper_exp : super_exp p21 super_exp_prima
-    '''
-
-def p_super_exp_prima(t):
-    '''
-    super_exp_prima : '&' super_exp
-                    | '|' super_exp
-                    | nulo
-    '''
-
-def p_p21(t):
-    '''
-    p21 : nulo
+    hiper_exp : super_exp super_exp_prima
     '''
     if p_oper and (p_oper[-1] in ['&', '|']):
         op_derecho = pila_o.pop()
@@ -332,24 +326,17 @@ def p_p21(t):
         cuadruplos.append([operador, op_izquierdo, op_derecho, resultado])
         pila_o.append(resultado)
         pila_tipos.append(tipo_resultado)
+
+def p_super_exp_prima(t):
+    '''
+    super_exp_prima : '&' super_exp
+                    | '|' super_exp
+                    | nulo
+    '''
     
 def p_super_exp(t):
     '''
-    super_exp : exp p20 exp_prima
-    '''
-
-def p_exp_prima(t):
-    '''
-    exp_prima : '>' p14 exp
-              | '<' p14 exp
-              | IGUAL_QUE p14 exp
-              | DIFERENTE_QUE p14 exp
-              | nulo
-    '''
-
-def p_p20(t):
-    '''
-    p20 : nulo
+    super_exp : exp exp_prima
     '''
     if p_oper and (p_oper[-1] in ['>', '<', '!=', '==']):
         op_derecho = pila_o.pop()
@@ -362,22 +349,19 @@ def p_p20(t):
         cuadruplos.append([operador, op_izquierdo, op_derecho, resultado])
         pila_o.append(resultado)
         pila_tipos.append(tipo_resultado)
+
+def p_exp_prima(t):
+    '''
+    exp_prima : '>' p14 exp
+              | '<' p14 exp
+              | IGUAL_QUE p14 exp
+              | DIFERENTE_QUE p14 exp
+              | nulo
+    '''
     
 def p_exp(t):
     '''
-    exp : term p18 term_prima
-    '''
-
-def p_term_prima(t):
-    '''
-    term_prima : '+' p14 term
-               | '-' p14 term
-               | nulo
-    '''
-
-def p_p18(t):
-    '''
-    p18 : nulo
+    exp : term term_prima
     '''
     if p_oper and (p_oper[-1] in ['+', '-']):
         op_derecho = pila_o.pop()
@@ -390,22 +374,17 @@ def p_p18(t):
         cuadruplos.append([operador, op_izquierdo, op_derecho, resultado])
         pila_o.append(resultado)
         pila_tipos.append(tipo_resultado)
+
+def p_term_prima(t):
+    '''
+    term_prima : '+' p14 term
+               | '-' p14 term
+               | nulo
+    '''
     
 def p_term(t):
     '''
-    term : factor p19 factor_prima
-    '''
-
-def p_factor_prima(t):
-    '''
-    factor_prima : '*' p14 factor
-                 | '/' p14 factor
-                 | nulo
-    '''
-
-def p_p19(t):
-    '''
-    p19 : nulo
+    term : factor factor_prima
     '''
     if p_oper and (p_oper[-1] in ['*', '/']):
         op_derecho = pila_o.pop()
@@ -418,6 +397,13 @@ def p_p19(t):
         cuadruplos.append([operador, op_izquierdo, op_derecho, resultado])
         pila_o.append(resultado)
         pila_tipos.append(tipo_resultado)
+
+def p_factor_prima(t):
+    '''
+    factor_prima : '*' p14 factor
+                 | '/' p14 factor
+                 | nulo
+    '''
 
 def p_p14(t):
     '''
@@ -523,22 +509,14 @@ hule()
 '''
 
 codigo_2 = '''
-func ent f(flot a, flot b) {
-    var flot k;
-    var flot l;
-    l = a - 5;
-    k = l * b;
-};
 hule() 
 { 
     var ent a, b;
-    var flot x;
-    var bool w;
+    var flot c;
     a = 2;
     b = 3;
     a = a + b;
-    x = b * 1.5;
-    w = x > a;
+    c = a * 1.5;
 }
 '''
 
