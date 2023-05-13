@@ -17,7 +17,7 @@ reserved = {
     'var' : 'VAR',
     'si' : 'SI',
     'sino' : 'SINO',
-    'vacio' : 'VACIO',
+    'vacia' : 'VACIA',
     'bool' : 'BOOL',
     'ent' : 'ENT',
     'flot' : 'FLOT',
