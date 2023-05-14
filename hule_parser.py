@@ -21,7 +21,7 @@ cuadruplos = []
 
 def p_programa(t):
     '''
-    programa : p1 dec HULE p2 '(' ')' '{' bloque '}'
+    programa : p1 dec_func HULE p2 '(' ')' '{' bloque '}'
     '''
     # todo: borrar todo en memoria al final
     cuadruplos.append(['ENDPROG', -1, -1, -1])
@@ -38,16 +38,6 @@ def p_p2(t):
     p2 : nulo
     '''
     cuadruplos[0][3] = len(cuadruplos)
-
-def p_dec(t):
-    '''
-    dec : dec_var dec
-        | dec_func dec
-        | nulo
-    '''
-
-# puedo usar variables globales en una funcion?
-# diferenciar entre globales y locales de hule() ?
 
 def p_dec_var(t):
     '''
