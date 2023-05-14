@@ -4,7 +4,6 @@ from directorio_funciones import DirFunciones
 from cubo_semantico import CuboSemantico
 from tabla_constantes import Constantes
 from utilidad import *
-import pprint
 
 dir_funciones = DirFunciones()
 cubo_semantico = CuboSemantico()
@@ -552,8 +551,6 @@ hule()
 
 parser.parse(codigo_2)
 
-pp = pprint.PrettyPrinter(indent=4)
-pp.pprint(cuadruplos)
-pp.pprint(dir_funciones.directorio['hule'][1].tabla)
-pp.pprint(dir_funciones.directorio['f'][1].tabla)
-pp.pprint(ctes.tabla)
+imprimir_cuadruplos(cuadruplos)
+imprimir_tabla_variables(dir_funciones)
+imprimir_tabla_constantes(ctes.tabla)
