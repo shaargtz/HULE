@@ -2,6 +2,9 @@ import math
 import random
 from memoria_virtual import VonNeumann
 
+# implementar stack de ejecucion
+# GOSUB: a donde regreso y que memoria necesito despertar
+
 class MaquinaVirtual:
     def __init__(self, cuadruplos, memoria):
         self.cuadruplos = cuadruplos

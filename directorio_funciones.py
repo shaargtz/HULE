@@ -1,24 +1,29 @@
 from tabla_variables import Variables
-
-memoria_vacia = {
+ 
+class DirFunciones:
+    def __init__(self):
+        self.directorio = {
+            # nombre : [tipo, variables, parametros, memoria, cuadruplo, return]
+            'hule' : ['vacia', None, [], {
                     'total' : 0,
                     'ent' : 0,
                     'flot' : 0,
                     'car' : 0,
                     'cadena' : 0,
                     'bool' : 0,
-                }, 
-
-class DirFunciones:
-    def __init__(self):
-        self.directorio = {
-            # nombre : [tipo, variables, parametros, memoria, cuadruplo, return]
-            'hule' : ['void', None, [], memoria_vacia, None, None]
+                }, None, None]
         }
     
     def insertar_funcion(self, func, tipo):
         if not self.directorio.get(func):
-            self.directorio[func] = [tipo, None, [], memoria_vacia, None, None]
+            self.directorio[func] = [tipo, None, [], {
+                    'total' : 0,
+                    'ent' : 0,
+                    'flot' : 0,
+                    'car' : 0,
+                    'cadena' : 0,
+                    'bool' : 0,
+                }, None, None]
         else:
             raise Exception("Funcion " + func + " definida multiples veces")
         
@@ -26,22 +31,22 @@ class DirFunciones:
         self.directorio[func][1] = Variables(alcance)
         
     def insertar_variable(self, func, tipo, var=None):
-        self.directorio[func][3][0][tipo] += 1
-        self.directorio[func][3][0]['total'] += 1
+        self.directorio[func][3][tipo] += 1
+        self.directorio[func][3]['total'] += 1
         return self.directorio[func][1].insertar(tipo, var)
 
     def insertar_parametro(self, func, tipo, var):
         self.directorio[func][2].append((var, tipo))
         self.insertar_variable(func, tipo, var)
 
-    def buscar_variable(self, func, id, glob=False):
+    def buscar_variable(self, func, id):
         var = self.directorio[func][1].tabla['var'].get(id)
         if var:
             return var[1]
-        if glob:
-            var = self.directorio['hule'][1].tabla['var'].get(id)
-            if var:
-                return var[1]
+        var = self.directorio['global'][1].tabla['var'].get(id)
+        print(var)
+        if var:
+            return var[1]
         raise Exception("Variable " + id + " no definida")
         
     def tiene_tabla_var(self, func):

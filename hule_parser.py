@@ -14,6 +14,7 @@ p_oper = []
 pila_saltos = []
 pila_tipos = []
 pila_func = []
+pila_llam = []
 
 cont_param = [0, 0]
 
@@ -21,23 +22,33 @@ cuadruplos = []
 
 def p_programa(t):
     '''
-    programa : p1 dec_func HULE p2 '(' ')' '{' bloque '}'
+    programa : p1 dec HULE p2 '(' ')' '{' bloque '}'
     '''
     # todo: borrar todo en memoria al final
     cuadruplos.append(['ENDPROG', -1, -1, -1])
+    pila_func.pop()
 
 def p_p1(t):
     '''
     p1 : nulo
     '''
-    pila_func.append('hule')
     cuadruplos.append(['GOTO', -1, -1, None])
+    dir_funciones.insertar_funcion('global', 'vacia')
+    pila_func.append('global')
 
 def p_p2(t):
     '''
     p2 : nulo
     '''
     cuadruplos[0][3] = len(cuadruplos)
+    pila_func.append('hule')
+
+def p_dec(t):
+    '''
+    dec : dec_var dec
+        | dec_func dec
+        | nulo
+    '''
 
 def p_dec_var(t):
     '''
@@ -45,13 +56,15 @@ def p_dec_var(t):
     '''
     pila_tipos.pop()
 
+# cambiar definicion de hule() como funcion local
+
 def p_p3(t):
     '''
     p3 : nulo
     '''
     if not dir_funciones.tiene_tabla_var(pila_func[-1]):
-        if pila_func[-1] == 'hule':
-            dir_funciones.insertar_tabla_var(pila_func[-1], 'global')
+        if (pila_func[-1] == 'global'):
+            dir_funciones.insertar_tabla_var('global', 'global')
         else:
             dir_funciones.insertar_tabla_var(pila_func[-1], 'local')
 
@@ -119,9 +132,9 @@ def p_p6(t):
     pila_func.append(t[-1])
     dir_funciones.insertar_funcion(pila_func[-1], t[-2])
     if t[-2] != 'vacia':
-        if not dir_funciones.tiene_tabla_var('hule'):
-            dir_funciones.insertar_tabla_var('hule', 'local')
-        dir_funciones.insertar_variable('hule', t[-2], '_' + t[-1])
+        if not dir_funciones.tiene_tabla_var('global'):
+            dir_funciones.insertar_tabla_var('global', 'global')
+        dir_funciones.insertar_variable('global', t[-2], '_' + t[-1])
 
 def p_p16(t):
     '''
@@ -397,8 +410,8 @@ def p_p15(t):
     global cont_param
     func = dir_funciones.directorio.get(t[-1])
     if func:
-        pila_func.append(t[-1])
-        mem = func[3][0]['total']
+        pila_llam.append(t[-1])
+        mem = func[3]['total']
         cuadruplos.append(['ERA', mem, -1, -1])
         cont_param = [0, len(func[2])]
     else:
@@ -423,10 +436,13 @@ def p_p13(t):
     p13 : nulo
     '''
     if cont_param[0] == cont_param[1]:
-        raise Exception("Funcion " + pila_func[-1] + " fue llamada con mas argumentos de los requeridos")
+        raise Exception("Funcion " + pila_llam[-1] + " fue llamada con mas argumentos de los requeridos")
     arg = pila_o.pop()
     tipo_arg = pila_tipos.pop()
-    direccion = dir_funciones.comparar_parametro(pila_func[-1], cont_param[0], tipo_arg)
+    # como lo manejo si es la misma direccion??
+    # ERA tiene que mandar una direccion de un scope a otra direccion de otro scope
+    # puedo usar una variable global para almacenar los parametros? asi como almaceno el return
+    direccion = dir_funciones.comparar_parametro(pila_llam[-1], cont_param[0], tipo_arg)
     cuadruplos.append(['PARAM', arg, -1, direccion])
     cont_param[0] += 1
 
@@ -473,7 +489,7 @@ def p_var(t):
         | ID '[' hiper_exp ']' '[' hiper_exp ']'
     '''
     # hardcoded para unicamente la primer regla
-    direccion = dir_funciones.buscar_variable(pila_func[-1], t[1], glob=True)
+    direccion = dir_funciones.buscar_variable(pila_func[-1], t[1])
     pila_o.append(direccion)
     pila_tipos.append(checar_tipo_memoria(direccion))
 
@@ -512,6 +528,8 @@ hule()
 '''
 
 codigo_2 = '''
+var ent x;
+var flot y;
 func ent f(flot a, flot b) {
     var flot k;
     var flot l;

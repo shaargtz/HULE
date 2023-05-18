@@ -1,6 +1,6 @@
 class Variables:
     def __init__(self, alcance):
-        # nombre : (tipo, direccion)
+        # nombre : (tipo, direccion, dimensiones)
         self.tabla = {
             'var' : {},
             'temp' : {},
@@ -43,13 +43,13 @@ class Variables:
     def insertar(self, tipo, var=None):
         if var:
             if not self.tabla['var'].get(var):
-                self.tabla['var'][var] = (tipo, self.contadores['var'][tipo])
+                self.tabla['var'][var] = (tipo, self.contadores['var'][tipo], 0)
                 self.contadores['var'][tipo] += 1
                 return self.contadores['var'][tipo] - 1
             else:
                 raise Exception("Variable " + var + " definida multiples veces")
         else:
             nueva_temp = tipo + str(self.contadores['temp'][tipo] % 1000)
-            self.tabla['temp'][nueva_temp] = (tipo, self.contadores['temp'][tipo])
+            self.tabla['temp'][nueva_temp] = (tipo, self.contadores['temp'][tipo], 0)
             self.contadores['temp'][tipo] += 1
             return self.contadores['temp'][tipo] - 1
