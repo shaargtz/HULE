@@ -6,6 +6,11 @@ def checar_tipo_memoria(direccion):
     aux = aux // 1000
     return tipos[aux]
 
+def checar_alcance_memoria(direccion):
+    alcances = ['glob', 'local', 'temp', 'ctes']
+    aux = direccion // 5000
+    return alcances[aux]
+
 def imprimir_cuadruplos(cuadruplos):
     tabla_cuadruplos = PrettyTable(['operador', 'operando1', 'operando2', 'direccion'])
     tabla_cuadruplos.add_rows(cuadruplos)
@@ -14,18 +19,10 @@ def imprimir_cuadruplos(cuadruplos):
 def imprimir_tabla_variables(dir_funciones):
     tabla_variables = PrettyTable(['funcion', 'especie', 'valor', 'tipo', 'direccion'])
     for f in dir_funciones.directorio:
-        for v in dir_funciones.directorio[f][1].tabla['var']:
-            tabla_variables.add_row([f, 'var', v, 
-                                    dir_funciones.directorio[f][1].tabla['var'][v][0], 
-                                    dir_funciones.directorio[f][1].tabla['var'][v][1]])
-        for v in dir_funciones.directorio[f][1].tabla['temp']:
-            tabla_variables.add_row([f, 'temp', v, 
-                                    dir_funciones.directorio[f][1].tabla['temp'][v][0], 
-                                    dir_funciones.directorio[f][1].tabla['temp'][v][1]])
+        if dir_funciones.directorio[f][1]:
+            for a in dir_funciones.directorio[f][1].tabla.keys():
+                for v in dir_funciones.directorio[f][1].tabla[a]:
+                    tabla_variables.add_row([f, a, v, 
+                                            dir_funciones.directorio[f][1].tabla[a][v][0], 
+                                            dir_funciones.directorio[f][1].tabla[a][v][1]])
     print(tabla_variables)
-            
-def imprimir_tabla_constantes(constantes):
-    tabla_constantes = PrettyTable(['valor', 'tipo', 'direccion'])
-    for c in constantes:
-        tabla_constantes.add_row([c, constantes[c][0], constantes[c][1]])
-    print(tabla_constantes)

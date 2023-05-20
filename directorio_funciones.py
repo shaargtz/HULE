@@ -3,27 +3,13 @@ from tabla_variables import Variables
 class DirFunciones:
     def __init__(self):
         self.directorio = {
-            # nombre : [tipo, variables, parametros, memoria, cuadruplo, return]
-            'hule' : ['vacia', None, [], {
-                    'total' : 0,
-                    'ent' : 0,
-                    'flot' : 0,
-                    'car' : 0,
-                    'cadena' : 0,
-                    'bool' : 0,
-                }, None, None]
+            # nombre : [tipo, variables, parametros, cuadruplo, return]
+            'hule' : ['vacia', None, None, None, None]
         }
     
     def insertar_funcion(self, func, tipo):
         if not self.directorio.get(func):
-            self.directorio[func] = [tipo, None, [], {
-                    'total' : 0,
-                    'ent' : 0,
-                    'flot' : 0,
-                    'car' : 0,
-                    'cadena' : 0,
-                    'bool' : 0,
-                }, None, None]
+            self.directorio[func] = [tipo, None, [], None, None]
         else:
             raise Exception("Funcion " + func + " definida multiples veces")
         
@@ -31,22 +17,29 @@ class DirFunciones:
         self.directorio[func][1] = Variables(alcance)
         
     def insertar_variable(self, func, tipo, var=None):
-        self.directorio[func][3][tipo] += 1
-        self.directorio[func][3]['total'] += 1
-        return self.directorio[func][1].insertar(tipo, var)
+        # caso en que inserte temporales sin tener variables locales
+        if not var and not self.directorio[func][1]:
+            self.insertar_tabla_var(func, 'local')
+        return self.directorio[func][1].insertar_variable(tipo, var)
+    
+    def insertar_constante(self, tipo, cte):
+        if 'ctes' not in self.directorio.keys():
+            self.directorio['ctes'] = ['vacia', Variables('ctes'), None, None, None, None]
+        return self.directorio['ctes'][1].insertar_constante(tipo, cte)
 
     def insertar_parametro(self, func, tipo, var):
         self.directorio[func][2].append((var, tipo))
         self.insertar_variable(func, tipo, var)
 
     def buscar_variable(self, func, id):
-        var = self.directorio[func][1].tabla['var'].get(id)
-        if var:
-            return var[1]
-        var = self.directorio['global'][1].tabla['var'].get(id)
-        print(var)
-        if var:
-            return var[1]
+        if self.directorio[func][1]:
+            var = self.directorio[func][1].tabla['local'].get(id)
+            if var:
+                return var[1]
+        if self.directorio['global'][1]:
+            var = self.directorio['global'][1].tabla['glob'].get(id)
+            if var:
+                return var[1]
         raise Exception("Variable " + id + " no definida")
         
     def tiene_tabla_var(self, func):
@@ -58,3 +51,19 @@ class DirFunciones:
             raise Exception("Argumento " + str(pos) + " es de tipo " + arg + " y deberia ser " + param[1])
         else:
             return self.buscar_variable(func, param[0])
+    
+    def insertar_retorno(self, func, dir):
+        self.directorio[func][4] = dir
+
+    def buscar_contadores_var(self, func):
+        if self.directorio[func][1]:
+            return self.directorio[func][1].contadores
+        else:
+            return None
+        
+    def buscar_ctes(self):
+        if 'ctes' in self.directorio.keys():
+            return self.directorio['ctes'][1].tabla['ctes']
+    
+    def buscar_cuadruplo(self, func):
+        return self.directorio[func][3]

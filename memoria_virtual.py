@@ -1,9 +1,8 @@
+from espacios_memoria import EspaciosMemoria
+from utilidad import checar_tipo_memoria, checar_alcance_memoria
+
 class VonNeumann:
     def __init__(self):
-        # Contador de los 20 bloques de memoria
-        # 4 segmentos con 5 tipos cada uno
-        self.cont = [0] * 20
-
         ############
         # GLOBALES #
         ############
@@ -36,50 +35,71 @@ class VonNeumann:
         # 17 [ 17000 -> 17999 : car ]
         # 18 [ 18000 -> 18999 : cadena ]
         # 19 [ 19000 -> 19999 : bool ]
-        self.data = []
+        # self.general = MemoriaGeneral()
+        # pasar cantidades de variables
+        self.pila_funciones = []
+        self.nueva_memoria = None
+        self.memoria_global = EspaciosMemoria()
+        self.memoria_ctes = EspaciosMemoria()
 
-    def obtener(self, direccion):
-        indice = direccion // 1000
-        espacio = direccion % 1000
-        while indice:
-            espacio += self.cont[indice - 1]
-            indice -= 1
-        return self.data[espacio]
+    def instanciar(self, alcance, contadores):
+        if alcance == 'hule':
+            self.era(contadores)
+            self.apilar_memoria()
+        elif alcance == 'global':
+            self.memoria_global.instanciar(contadores)
+        elif alcance == 'ctes':
+            self.memoria_ctes.instanciar(contadores)
 
-    def asignar(self, direccion, valor):
-        indice = direccion // 1000
-        espacio = direccion % 1000
-        while indice:
-            espacio += self.cont[indice - 1]
-            indice -= 1
-        print(espacio)
-        self.data[espacio] = valor
-            
-    def siguiente_espacio(self, tipo):
-        codigo = {
-            'global_ent' : 0,
-            'global_flot' : 1,
-            'global_car' : 2,
-            'global_cadena' : 3,
-            'global_bool' : 4,
-            'local_ent' : 5,
-            'local_flot' : 6,
-            'local_car' : 7,
-            'local_cadena' : 8,
-            'local_bool' : 9,
-            'temp_ent' : 10,
-            'temp_flot' : 11,
-            'temp_car' : 12,
-            'temp_cadena' : 13,
-            'temp_bool' : 14,
-            'cte_ent' : 15,
-            'cte_flot' : 16,
-            'cte_car' : 17,
-            'cte_cadena' : 18,
-            'cte_bool' : 19,
-        }
-        indice = codigo['tipo']
-        espacio = self.cont[indice] + indice * 1000
-        return espacio
+    def era(self, contadores):
+        self.nueva_memoria = EspaciosMemoria()
+        self.nueva_memoria.instanciar(contadores)
+    
+    def param(self, dir1, dir2):
+        val = self.buscar_casilla(dir1)
+        self.asignar_param(dir2, val)
 
-        
+    def apilar_memoria(self):
+        self.pila_funciones.append(self.nueva_memoria)
+        self.nueva_memoria = None
+
+    def dormir_memoria(self):
+        self.pila_funciones.pop()
+
+    def buscar_casilla(self, dir):
+        alcance = checar_alcance_memoria(dir)
+        tipo = checar_tipo_memoria(dir)
+        indice = dir % 1000
+        if alcance in ['local', 'temp']:
+            return self.pila_funciones[-1].espacios[alcance][tipo][indice]
+        elif alcance == 'glob':
+            return self.memoria_global.espacios[alcance][tipo][indice]
+        elif alcance == 'ctes':
+            return self.memoria_ctes.espacios[alcance][tipo][indice]
+
+    def asignar_casilla(self, dir, val):
+        alcance = checar_alcance_memoria(dir)
+        tipo = checar_tipo_memoria(dir)
+        indice = dir % 1000
+        if alcance in ['local', 'temp']:
+            self.pila_funciones[-1].espacios[alcance][tipo][indice] = val
+        elif alcance == 'glob':
+            self.memoria_global.espacios[alcance][tipo][indice] = val
+        elif alcance == 'ctes':
+            self.memoria_ctes.espacios[alcance][tipo][indice] = val
+
+    def asignar_param(self, dir, val):
+        alcance = checar_alcance_memoria(dir)
+        tipo = checar_tipo_memoria(dir)
+        indice = dir % 1000
+        self.nueva_memoria.espacios[alcance][tipo][indice] = val
+
+    def inicializar_ctes(self, tabla):
+        for cte in tabla:
+            # nombre : (tipo, direccion, dimensiones)
+            if tabla[cte][0] == 'ent':
+                self.asignar_casilla(tabla[cte][1], int(cte))
+            if tabla[cte][0] == 'flot':
+                self.asignar_casilla(tabla[cte][1], float(cte))
+            if tabla[cte][0] in ['car', 'cadena']:
+                self.asignar_casilla(tabla[cte][1], cte)

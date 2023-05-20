@@ -2,15 +2,14 @@ from ply import yacc
 from hule_lexer import tokens
 from directorio_funciones import DirFunciones
 from cubo_semantico import CuboSemantico
-from tabla_constantes import Constantes
 from utilidad import *
+from maquina_virtual import MaquinaVirtual
 
 dir_funciones = DirFunciones()
 cubo_semantico = CuboSemantico()
-ctes = Constantes()
 
 pila_o = []
-p_oper = []
+pil_oper = []
 pila_saltos = []
 pila_tipos = []
 pila_func = []
@@ -42,6 +41,7 @@ def p_p2(t):
     '''
     cuadruplos[0][3] = len(cuadruplos)
     pila_func.append('hule')
+    cuadruplos.append(['INSTANCIAR', -1, -1, -1])
 
 def p_dec(t):
     '''
@@ -134,13 +134,14 @@ def p_p6(t):
     if t[-2] != 'vacia':
         if not dir_funciones.tiene_tabla_var('global'):
             dir_funciones.insertar_tabla_var('global', 'global')
-        dir_funciones.insertar_variable('global', t[-2], '_' + t[-1])
+        ret = dir_funciones.insertar_variable('global', t[-2], '_' + t[-1])
+        dir_funciones.insertar_retorno(pila_func[-1], ret)
 
 def p_p16(t):
     '''
     p16 : nulo
     '''
-    dir_funciones.directorio[pila_func[-1]][4] = len(cuadruplos)
+    dir_funciones.directorio[pila_func[-1]][3] = len(cuadruplos)
     
 def p_super_tipo(t):
     '''
@@ -194,6 +195,7 @@ def p_est(t):
         | cond
         | llama_func_est
         | retorno
+        | imprimir
     '''
     
 def p_asig(t):
@@ -210,7 +212,7 @@ def p_asig(t):
 
 def p_ciclo_m(t):
     '''
-    ciclo_m : MIENTRAS p11 '(' hiper_exp ')' p12 '{' bloque '}' ';'
+    ciclo_m : MIENTRAS p11 '(' hiper_exp ')' p12 '{' bloque '}'
     '''
     fin_ciclo = pila_saltos.pop()
     retorno = pila_saltos.pop()
@@ -236,13 +238,13 @@ def p_p12(t):
 
 def p_ciclo_p(t):
     '''
-    ciclo_p : POR '(' ID EN ID ')' '{' bloque '}' ';'
+    ciclo_p : POR '(' ID EN ID ')' '{' bloque '}'
     '''
     # hasta que haga listas
 
 def p_cond(t):
     '''
-    cond : SI '(' hiper_exp ')' p9 '{' bloque '}' sino ';'
+    cond : SI '(' hiper_exp ')' p9 '{' bloque '}' sino
     '''
     fin_cond = pila_saltos.pop()
     cuadruplos[fin_cond][3] = len(cuadruplos)
@@ -283,16 +285,23 @@ def p_retorno(t):
     retorno : REGRESA hiper_exp
     '''
 
+def p_imprimir(t):
+    '''
+    imprimir : IMPRIME '(' hiper_exp ')' ';'
+    '''
+    cuadruplos.append(['imprime', -1, -1, pila_o.pop()])
+    pila_tipos.pop()
+
 def p_hiper_exp(t):
     '''
     hiper_exp : super_exp super_exp_prima
     '''
-    if p_oper and (p_oper[-1] in ['&', '|']):
+    if pil_oper and (pil_oper[-1] in ['&', '|']):
         op_derecho = pila_o.pop()
         tipo_derecho = pila_tipos.pop()
         op_izquierdo = pila_o.pop()
         tipo_izquierdo = pila_tipos.pop()
-        operador = p_oper.pop()
+        operador = pil_oper.pop()
         tipo_resultado = cubo_semantico.emparejar_tipo((operador, tipo_izquierdo, tipo_derecho))
         resultado = dir_funciones.insertar_variable(pila_func[-1], tipo_resultado)
         cuadruplos.append([operador, op_izquierdo, op_derecho, resultado])
@@ -310,12 +319,12 @@ def p_super_exp(t):
     '''
     super_exp : exp exp_prima
     '''
-    if p_oper and (p_oper[-1] in ['>', '<', '!=', '==']):
+    if pil_oper and (pil_oper[-1] in ['>', '<', '!=', '==']):
         op_derecho = pila_o.pop()
         tipo_derecho = pila_tipos.pop()
         op_izquierdo = pila_o.pop()
         tipo_izquierdo = pila_tipos.pop()
-        operador = p_oper.pop()
+        operador = pil_oper.pop()
         tipo_resultado = cubo_semantico.emparejar_tipo((operador, tipo_izquierdo, tipo_derecho))
         resultado = dir_funciones.insertar_variable(pila_func[-1], tipo_resultado)
         cuadruplos.append([operador, op_izquierdo, op_derecho, resultado])
@@ -335,12 +344,12 @@ def p_exp(t):
     '''
     exp : term term_prima
     '''
-    if p_oper and (p_oper[-1] in ['+', '-']):
+    if pil_oper and (pil_oper[-1] in ['+', '-']):
         op_derecho = pila_o.pop()
         tipo_derecho = pila_tipos.pop()
         op_izquierdo = pila_o.pop()
         tipo_izquierdo = pila_tipos.pop()
-        operador = p_oper.pop()
+        operador = pil_oper.pop()
         tipo_resultado = cubo_semantico.emparejar_tipo((operador, tipo_izquierdo, tipo_derecho))
         resultado = dir_funciones.insertar_variable(pila_func[-1], tipo_resultado)
         cuadruplos.append([operador, op_izquierdo, op_derecho, resultado])
@@ -358,12 +367,12 @@ def p_term(t):
     '''
     term : factor factor_prima
     '''
-    if p_oper and (p_oper[-1] in ['*', '/']):
+    if pil_oper and (pil_oper[-1] in ['*', '/']):
         op_derecho = pila_o.pop()
         tipo_derecho = pila_tipos.pop()
         op_izquierdo = pila_o.pop()
         tipo_izquierdo = pila_tipos.pop()
-        operador = p_oper.pop()
+        operador = pil_oper.pop()
         tipo_resultado = cubo_semantico.emparejar_tipo((operador, tipo_izquierdo, tipo_derecho))
         resultado = dir_funciones.insertar_variable(pila_func[-1], tipo_resultado)
         cuadruplos.append([operador, op_izquierdo, op_derecho, resultado])
@@ -381,7 +390,7 @@ def p_p14(t):
     '''
     p14 : nulo
     '''
-    p_oper.append(t[-1])
+    pil_oper.append(t[-1])
 
 def p_factor(t):
     '''
@@ -397,8 +406,7 @@ def p_llama_func_exp(t):
     '''
     if cont_param[0] < cont_param[1]:
         raise Exception("Funcion " + t[1] + " fue llamada con menos argumentos de los requeridos")
-    # todo: parametros gosub
-    cuadruplos.append(['GOSUB', None, None, None])
+    cuadruplos.append(['GOSUB', None, None, t[1]])
     pila_func.pop()
     cont_param[0] = 0
     cont_param[1] = 0
@@ -411,8 +419,7 @@ def p_p15(t):
     func = dir_funciones.directorio.get(t[-1])
     if func:
         pila_llam.append(t[-1])
-        mem = func[3]['total']
-        cuadruplos.append(['ERA', mem, -1, -1])
+        cuadruplos.append(['ERA', -1, -1, t[-1]])
         cont_param = [0, len(func[2])]
     else:
         raise Exception("Funcion " + t[-1] + " no esta definida")
@@ -439,9 +446,6 @@ def p_p13(t):
         raise Exception("Funcion " + pila_llam[-1] + " fue llamada con mas argumentos de los requeridos")
     arg = pila_o.pop()
     tipo_arg = pila_tipos.pop()
-    # como lo manejo si es la misma direccion??
-    # ERA tiene que mandar una direccion de un scope a otra direccion de otro scope
-    # puedo usar una variable global para almacenar los parametros? asi como almaceno el return
     direccion = dir_funciones.comparar_parametro(pila_llam[-1], cont_param[0], tipo_arg)
     cuadruplos.append(['PARAM', arg, -1, direccion])
     cont_param[0] += 1
@@ -453,7 +457,7 @@ def p_cte(t):
         | CTE_CAR p8_3
         | CTE_CADENA p8_4
     '''
-    mem = ctes.insertar(t[1], pila_tipos[-1])
+    mem = dir_funciones.insertar_constante(pila_tipos[-1], t[1])
     pila_o.append(mem)
 
 # checar si usare constantes booleanas
@@ -528,32 +532,32 @@ hule()
 '''
 
 codigo_2 = '''
-var ent x;
-var flot y;
-func ent f(flot a, flot b) {
-    var flot k;
-    var flot l;
-    l = a - 5;
-    k = l * b;
+var ent a, b, c;
+func vacia imprime_x_veces(cadena s, ent veces) {
+    var ent cont;
+    cont = 0;
+    mientras (cont < veces) {
+        imprime(s);
+        cont = cont + 1;
+    }
 };
 hule() 
-{ 
-    var ent a, b;
-    var flot c;
-    var bool d;
-    a = 2;
-    b = 3;
-    a = a + b;
-    c = a * 4.5;
-    d = a > b | a > c;
-    mientras (c > b) {
-        si (d) {
-            c = c - 1;
-        } sino {
-            c = c - 2;
-        };
-    };
-    f(c, 4.2);
+{
+    a = 3;
+    b = 4;
+    c = a + b;
+    mientras (c > b){
+        b = b + 1;
+        a = a * 2;
+    }
+    si (a / 3 > 10) {
+        imprime('aaa');
+    } sino {
+        imprime('bbb');
+    }
+    imprime(c);
+    imprime(a);
+    imprime_x_veces('hola', 5);
 }
 '''
 
@@ -561,4 +565,6 @@ parser.parse(codigo_2)
 
 imprimir_cuadruplos(cuadruplos)
 imprimir_tabla_variables(dir_funciones)
-imprimir_tabla_constantes(ctes.tabla)
+
+mv = MaquinaVirtual(cuadruplos, dir_funciones)
+mv.ejecutar()
