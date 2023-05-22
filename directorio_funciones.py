@@ -67,3 +67,6 @@ class DirFunciones:
     
     def buscar_cuadruplo(self, func):
         return self.directorio[func][3]
+    
+    def buscar_tipo_funcion(self, func):
+        return self.directorio[func][0]

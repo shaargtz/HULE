@@ -25,7 +25,6 @@ def p_programa(t):
     '''
     # todo: borrar todo en memoria al final
     cuadruplos.append(['ENDPROG', -1, -1, -1])
-    pila_func.pop()
 
 def p_p1(t):
     '''
@@ -282,8 +281,14 @@ def p_llama_func_est(t):
 
 def p_retorno(t):
     '''
-    retorno : REGRESA hiper_exp
+    retorno : REGRESA hiper_exp ';'
     '''
+    val = pila_o.pop()
+    pila_tipos.pop()
+    print(pila_func[-1])
+    retorno = dir_funciones.buscar_variable(pila_func[-1], '_' + pila_func[-1])
+    print(retorno)
+    cuadruplos.append(['REGRESA', val, -1, retorno])
 
 def p_imprimir(t):
     '''
@@ -407,7 +412,15 @@ def p_llama_func_exp(t):
     if cont_param[0] < cont_param[1]:
         raise Exception("Funcion " + t[1] + " fue llamada con menos argumentos de los requeridos")
     cuadruplos.append(['GOSUB', None, None, t[1]])
+    tipo_retorno = dir_funciones.buscar_tipo_funcion(pila_llam[-1])
     pila_func.pop()
+    if tipo_retorno != 'vacia':
+        retorno_glob = dir_funciones.buscar_variable(pila_llam[-1], '_' + t[1])
+        retorno_temp = dir_funciones.insertar_variable(pila_llam[-1], tipo_retorno)
+        cuadruplos.append(['=', retorno_glob, -1, retorno_temp])
+        pila_o.append(retorno_temp)
+        pila_tipos.append(retorno_temp)
+    pila_llam.pop()
     cont_param[0] = 0
     cont_param[1] = 0
 
@@ -541,6 +554,15 @@ func vacia imprime_x_veces(cadena s, ent veces) {
         cont = cont + 1;
     }
 };
+func ent exponente(ent base, ent exp) {
+    var ent res;
+    res = 1;
+    mientras (exp > 0) {
+        res = res * base;
+        exp = exp - 1;
+    }
+    regresa res;
+};
 hule() 
 {
     a = 3;
@@ -558,6 +580,7 @@ hule()
     imprime(c);
     imprime(a);
     imprime_x_veces('hola', 5);
+    imprime(exponente(3, 5));
 }
 '''
 

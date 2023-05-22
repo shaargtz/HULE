@@ -124,6 +124,9 @@ class MaquinaVirtual:
                 # print("GOSUB {}".format(destino))
                 self.pila_apuntador.append(self.dir_func.buscar_cuadruplo(destino) - 1)
                 self.memoria.apilar_memoria()
+            elif operador == 'REGRESA':
+                # print("REGRESA {} {}".format(operando_1, destino))
+                self.memoria.asignar_casilla(destino, self.memoria.buscar_casilla(operando_1))
             elif operador == 'INSTANCIAR':
                 # print("INSTANCIAR")
                 self.memoria.instanciar('hule', self.dir_func.buscar_contadores_var('hule'))
