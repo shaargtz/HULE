@@ -49,11 +49,17 @@ def p_dec(t):
 
 def p_dec_var(t):
     '''
-    dec_var : p3 VAR tipo ID p4 dec_var_prima ';'
+    dec_var : dec_var_simple
+            | dec_lista
+            | dec_matriz
     '''
     pila_tipos.pop()
 
-# cambiar definicion de hule() como funcion local
+def p_dec_var_simple(t):
+    '''
+    dec_var_simple : p3 VAR tipo ID p4 dec_var_prima ';'
+    '''
+    pila_tipos.pop()
 
 def p_p3(t):
     '''
