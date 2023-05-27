@@ -12,8 +12,9 @@ def checar_alcance_memoria(direccion):
     return alcances[aux]
 
 def imprimir_cuadruplos(cuadruplos):
-    tabla_cuadruplos = PrettyTable(['operador', 'operando1', 'operando2', 'direccion'])
-    tabla_cuadruplos.add_rows(cuadruplos)
+    tabla_cuadruplos = PrettyTable(['#', 'operador', 'operando1', 'operando2', 'direccion'])
+    for c in range(len(cuadruplos)):
+        tabla_cuadruplos.add_row([c] + cuadruplos[c])
     print(tabla_cuadruplos)
 
 def imprimir_tabla_variables(dir_funciones):

@@ -38,7 +38,7 @@ class VonNeumann:
         # self.general = MemoriaGeneral()
         # pasar cantidades de variables
         self.pila_funciones = []
-        self.nueva_memoria = None
+        self.nueva_memoria = []
         self.memoria_global = EspaciosMemoria()
         self.memoria_ctes = EspaciosMemoria()
 
@@ -52,18 +52,18 @@ class VonNeumann:
             self.memoria_ctes.instanciar(contadores)
 
     def era(self, contadores):
-        self.nueva_memoria = EspaciosMemoria()
-        self.nueva_memoria.instanciar(contadores)
+        self.nueva_memoria.append(EspaciosMemoria())
+        self.nueva_memoria[-1].instanciar(contadores)
     
     def param(self, dir1, dir2):
         val = self.buscar_casilla(dir1)
         self.asignar_param(dir2, val)
-
+ 
     def apilar_memoria(self):
-        self.pila_funciones.append(self.nueva_memoria)
-        self.nueva_memoria = None
+        self.pila_funciones.append(self.nueva_memoria.pop())
 
-    def dormir_memoria(self):
+    def dormir_memoria(self, pointer):
+        # print(pointer)
         self.pila_funciones.pop()
 
     def buscar_casilla(self, dir):
@@ -82,6 +82,7 @@ class VonNeumann:
         tipo = checar_tipo_memoria(dir)
         indice = dir % 1000
         if alcance in ['local', 'temp']:
+            # print(self.pila_funciones[-1])
             self.pila_funciones[-1].espacios[alcance][tipo][indice] = val
         elif alcance == 'glob':
             self.memoria_global.espacios[alcance][tipo][indice] = val
@@ -92,7 +93,7 @@ class VonNeumann:
         alcance = checar_alcance_memoria(dir)
         tipo = checar_tipo_memoria(dir)
         indice = dir % 1000
-        self.nueva_memoria.espacios[alcance][tipo][indice] = val
+        self.nueva_memoria[-1].espacios[alcance][tipo][indice] = val
 
     def inicializar_ctes(self, tabla):
         for cte in tabla:

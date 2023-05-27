@@ -48,7 +48,7 @@ class DirFunciones:
     def comparar_parametro(self, func, pos, arg):
         param = self.directorio[func][2][pos]
         if arg != param[1]:
-            raise Exception("Argumento " + str(pos) + " es de tipo " + arg + " y deberia ser " + param[1])
+            raise Exception("Argumento " + str(pos) + " es de tipo " + str(arg) + " y deberia ser " + param[1])
         else:
             return self.buscar_variable(func, param[0])
     

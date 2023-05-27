@@ -1,6 +1,7 @@
 import math
 import random
 from memoria_virtual import VonNeumann
+import pprint
 
 class MaquinaVirtual:
     def __init__(self, cuadruplos, dir_func):
@@ -122,7 +123,7 @@ class MaquinaVirtual:
                 self.pila_apuntador[-1] = destino - 1
             elif operador == 'GOSUB':
                 # print("GOSUB {}".format(destino))
-                self.pila_apuntador.append(self.dir_func.buscar_cuadruplo(destino) - 1)
+                self.pila_apuntador.append(destino -1)
                 self.memoria.apilar_memoria()
             elif operador == 'REGRESA':
                 # print("REGRESA {} {}".format(operando_1, destino))
@@ -141,7 +142,7 @@ class MaquinaVirtual:
                 self.memoria.param(operando_1, destino)
             elif operador == 'ENDFUNC':
                 # print("ENDFUNC")
-                self.memoria.dormir_memoria
+                self.memoria.dormir_memoria(self.pila_apuntador[-1])
                 self.pila_apuntador.pop()
             elif operador == 'ENDPROG':
                 # print("ENDFUNC")
@@ -150,3 +151,11 @@ class MaquinaVirtual:
                 print("Operador no reconocido: {}".format(operador))
             
             self.pila_apuntador[-1] += 1
+
+    def imprimir_memoria(self):
+        pp = pprint.PrettyPrinter(indent=4)
+        pp.pprint(self.memoria.memoria_global.espacios)
+        pp.pprint(self.memoria.memoria_ctes.espacios)
+        print(str(len(self.memoria.pila_funciones)) + " stack de memoria")
+        for m in self.memoria.pila_funciones:
+            pp.pprint(m.espacios)

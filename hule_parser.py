@@ -15,8 +15,6 @@ pila_tipos = []
 pila_func = []
 pila_llam = []
 
-cont_param = [0, 0]
-
 cuadruplos = []
 
 def p_programa(t):
@@ -122,7 +120,7 @@ def p_dec_func(t):
     # todo: borrar tabla de variables al terminar de generar sus cuadruplos
     # todo: parametros endfunc
     pila_func.pop()
-    cuadruplos.append(['ENDFUNC', None, None, None])
+    cuadruplos.append(['ENDFUNC', -1, -1, -1])
 
 def p_p6(t):
     '''
@@ -285,9 +283,7 @@ def p_retorno(t):
     '''
     val = pila_o.pop()
     pila_tipos.pop()
-    print(pila_func[-1])
     retorno = dir_funciones.buscar_variable(pila_func[-1], '_' + pila_func[-1])
-    print(retorno)
     cuadruplos.append(['REGRESA', val, -1, retorno])
 
 def p_imprimir(t):
@@ -315,8 +311,8 @@ def p_hiper_exp(t):
 
 def p_super_exp_prima(t):
     '''
-    super_exp_prima : '&' super_exp
-                    | '|' super_exp
+    super_exp_prima : '&' p14 super_exp
+                    | '|' p14 super_exp
                     | nulo
     '''
     
@@ -397,57 +393,64 @@ def p_p14(t):
     '''
     pil_oper.append(t[-1])
 
+def p_p17(t):
+    '''
+    p17 : nulo
+    '''
+    pil_oper.pop()
+
 def p_factor(t):
     '''
     factor : llama_func_exp
            | cte
            | var
+           | sub_exp
     '''
-    # no funciona la llamada de funcion
+
+def p_sub_exp(t):
+    '''
+    sub_exp : '(' p14 hiper_exp ')' p17
+    '''
 
 def p_llama_func_exp(t):
     '''
-    llama_func_exp : ID p15 '(' arg ')'
+    llama_func_exp : ID p15 '(' p14 arg ')' p17
     '''
-    if cont_param[0] < cont_param[1]:
+    if pila_llam[-1][1][0] < pila_llam[-1][1][1]:
         raise Exception("Funcion " + t[1] + " fue llamada con menos argumentos de los requeridos")
-    cuadruplos.append(['GOSUB', None, None, t[1]])
-    tipo_retorno = dir_funciones.buscar_tipo_funcion(pila_llam[-1])
-    pila_func.pop()
+    cuadruplos.append(['GOSUB', -1, -1, dir_funciones.buscar_cuadruplo(t[1])])
+    tipo_retorno = dir_funciones.buscar_tipo_funcion(pila_llam[-1][0])
     if tipo_retorno != 'vacia':
-        retorno_glob = dir_funciones.buscar_variable(pila_llam[-1], '_' + t[1])
-        retorno_temp = dir_funciones.insertar_variable(pila_llam[-1], tipo_retorno)
+        retorno_glob = dir_funciones.buscar_variable(pila_llam[-1][0], '_' + t[1])
+        pila_llam.pop()
+        retorno_temp = dir_funciones.insertar_variable(pila_llam[-1][0], tipo_retorno)
         cuadruplos.append(['=', retorno_glob, -1, retorno_temp])
         pila_o.append(retorno_temp)
-        pila_tipos.append(retorno_temp)
+        pila_tipos.append(checar_tipo_memoria(retorno_temp))
     pila_llam.pop()
-    cont_param[0] = 0
-    cont_param[1] = 0
 
 def p_p15(t):
     '''
     p15 : nulo
     '''
-    global cont_param
     func = dir_funciones.directorio.get(t[-1])
+    pila_llam.append([pila_func[-1], []])
     if func:
-        pila_llam.append(t[-1])
+        pila_llam.append([t[-1], []])
         cuadruplos.append(['ERA', -1, -1, t[-1]])
-        cont_param = [0, len(func[2])]
+        pila_llam[-1][1] = [0, len(func[2])]
     else:
         raise Exception("Funcion " + t[-1] + " no esta definida")
 
 def p_arg(t):
     '''
-    arg : var p13 arg_prima
-        | cte p13 arg_prima
+    arg : hiper_exp p13 arg_prima
         | nulo
     '''
 
 def p_arg_prima(t):
     '''
-    arg_prima : ',' var p13 arg_prima
-              | ',' cte p13 arg_prima
+    arg_prima : ',' hiper_exp p13 arg_prima
               | nulo
     '''
 
@@ -455,13 +458,13 @@ def p_p13(t):
     '''
     p13 : nulo
     '''
-    if cont_param[0] == cont_param[1]:
-        raise Exception("Funcion " + pila_llam[-1] + " fue llamada con mas argumentos de los requeridos")
+    if pila_llam[-1][1][0] == pila_llam[-1][1][1]:
+        raise Exception("Funcion " + pila_llam[-1][1] + " fue llamada con mas argumentos de los requeridos")
     arg = pila_o.pop()
     tipo_arg = pila_tipos.pop()
-    direccion = dir_funciones.comparar_parametro(pila_llam[-1], cont_param[0], tipo_arg)
+    direccion = dir_funciones.comparar_parametro(pila_llam[-1][0], pila_llam[-1][1][0], tipo_arg)
     cuadruplos.append(['PARAM', arg, -1, direccion])
-    cont_param[0] += 1
+    pila_llam[-1][1][0] += 1
 
 def p_cte(t):
     '''
@@ -524,33 +527,27 @@ def p_error(t):
 parser = yacc.yacc()
 
 codigo_1 = '''
-func ent f(flot a, flot b) {
-    var flot k;
-    var flot l;
-    l = a - 5;
-    k = l * b;
+func ent fact(ent a) {
+    si (a == 1 | a == 0) {
+        regresa 1;
+    } sino {
+        regresa a * fact(a - 1);
+    }
 };
 hule() 
 {
-    var ent a, b, c[5];
-    a = 2;
-    b = 3;
-    si (a < b) 
-    {
-        f('bbb');
-    } sino {
-        f('aaa');
-    };
+    imprime(fact(10));
+    imprime(3 - (4 * (5 - 2)));
 }
 '''
 
 codigo_2 = '''
-var ent a, b, c;
-func vacia imprime_x_veces(cadena s, ent veces) {
+var ent a, b;
+func vacia imprime_x_veces(cadena w, ent veces) {
     var ent cont;
     cont = 0;
     mientras (cont < veces) {
-        imprime(s);
+        imprime(w);
         cont = cont + 1;
     }
 };
@@ -565,6 +562,7 @@ func ent exponente(ent base, ent exp) {
 };
 hule() 
 {
+    var ent c;
     a = 3;
     b = 4;
     c = a + b;
@@ -580,7 +578,7 @@ hule()
     imprime(c);
     imprime(a);
     imprime_x_veces('hola', 5);
-    imprime(exponente(3, 5));
+    imprime(exponente(3, exponente(2, 3)));
 }
 '''
 
@@ -591,3 +589,4 @@ imprimir_tabla_variables(dir_funciones)
 
 mv = MaquinaVirtual(cuadruplos, dir_funciones)
 mv.ejecutar()
+mv.imprimir_memoria()
