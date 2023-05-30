@@ -16,11 +16,11 @@ class DirFunciones:
     def insertar_tabla_var(self, func, alcance):
         self.directorio[func][1] = Variables(alcance)
         
-    def insertar_variable(self, func, tipo, var=None):
+    def insertar_variable(self, func, tipo, var=None, dims=None):
         # caso en que inserte temporales sin tener variables locales
         if not var and not self.directorio[func][1]:
             self.insertar_tabla_var(func, 'local')
-        return self.directorio[func][1].insertar_variable(tipo, var)
+        return self.directorio[func][1].insertar_variable(tipo, var, dims)
     
     def insertar_constante(self, tipo, cte):
         if 'ctes' not in self.directorio.keys():
@@ -70,3 +70,25 @@ class DirFunciones:
     
     def buscar_tipo_funcion(self, func):
         return self.directorio[func][0]
+    
+    def buscar_dimensiones(self, func, id):
+        if self.directorio[func][1]:
+            var = self.directorio[func][1].tabla['local'].get(id)
+            if var:
+                return var[2].retornar_dimensiones()
+        if self.directorio['global'][1]:
+            var = self.directorio['global'][1].tabla['glob'].get(id)
+            if var:
+                return var[2].retornar_dimensiones()
+        raise Exception("Variable " + id + " no definida")
+    
+    def buscar_m(self, func, id):
+        if self.directorio[func][1]:
+            var = self.directorio[func][1].tabla['local'].get(id)
+            if var:
+                return var[2].retornar_m()
+        if self.directorio['global'][1]:
+            var = self.directorio['global'][1].tabla['glob'].get(id)
+            if var:
+                return var[2].retornar_m()
+        raise Exception("Variable " + id + " no definida")

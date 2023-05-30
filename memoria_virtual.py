@@ -27,16 +27,15 @@ class VonNeumann:
         # 12 [ 12000 -> 12999 : car ]
         # 13 [ 13000 -> 13999 : cadena ]
         # 14 [ 14000 -> 14999 : bool ]
+        # 15 [ 15000 -> 15999 : apuntador ]
         ##############
         # CONSTANTES #
         ##############
-        # 15 [ 15000 -> 15999 : ent ]
-        # 16 [ 16000 -> 16999 : flot ]
-        # 17 [ 17000 -> 17999 : car ]
-        # 18 [ 18000 -> 18999 : cadena ]
-        # 19 [ 19000 -> 19999 : bool ]
-        # self.general = MemoriaGeneral()
-        # pasar cantidades de variables
+        # 16 [ 16000 -> 16999 : ent ]
+        # 17 [ 17000 -> 17999 : flot ]
+        # 18 [ 18000 -> 18999 : car ]
+        # 19 [ 19000 -> 19999 : cadena ]
+
         self.pila_funciones = []
         self.nueva_memoria = []
         self.memoria_global = EspaciosMemoria()
@@ -62,8 +61,7 @@ class VonNeumann:
     def apilar_memoria(self):
         self.pila_funciones.append(self.nueva_memoria.pop())
 
-    def dormir_memoria(self, pointer):
-        # print(pointer)
+    def dormir_memoria(self):
         self.pila_funciones.pop()
 
     def buscar_casilla(self, dir):
@@ -82,7 +80,6 @@ class VonNeumann:
         tipo = checar_tipo_memoria(dir)
         indice = dir % 1000
         if alcance in ['local', 'temp']:
-            # print(self.pila_funciones[-1])
             self.pila_funciones[-1].espacios[alcance][tipo][indice] = val
         elif alcance == 'glob':
             self.memoria_global.espacios[alcance][tipo][indice] = val

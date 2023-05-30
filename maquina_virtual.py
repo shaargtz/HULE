@@ -16,6 +16,13 @@ class MaquinaVirtual:
             operando_1 = self.cuadruplos[self.pila_apuntador[-1]][1]
             operando_2 = self.cuadruplos[self.pila_apuntador[-1]][2]
             destino = self.cuadruplos[self.pila_apuntador[-1]][3]
+            if operador != '+dir':
+                if operando_1 >= 15000 and operando_1 < 16000:
+                    operando_1 = self.memoria.buscar_casilla(operando_1)
+                if operando_2 >= 15000 and operando_2 < 16000:
+                    operando_2 = self.memoria.buscar_casilla(operando_2)
+                if destino >= 15000 and destino < 16000:
+                    destino = self.memoria.buscar_casilla(destino)
             if operador == '+':
                 # print("{} + {} = ".format(operando_1, operando_2) + str(self.memoria.buscar_casilla(operando_1) + self.memoria.buscar_casilla(operando_2)))
                 self.memoria.asignar_casilla(destino, self.memoria.buscar_casilla(operando_1) + self.memoria.buscar_casilla(operando_2))
@@ -47,7 +54,7 @@ class MaquinaVirtual:
                 # print("{} != {} = ".format(operando_1, operando_2) + str(self.memoria.buscar_casilla(operando_1) != self.memoria.buscar_casilla(operando_2)))
                 self.memoria.asignar_casilla(destino, self.memoria.buscar_casilla(operando_1) != self.memoria.buscar_casilla(operando_2))
             elif operador == '=':
-                # print("{} = {}".format(destino, operando_1))
+                # print("{} = {}".format(destino, self.memoria.buscar_casilla(operando_1)))
                 self.memoria.asignar_casilla(destino, self.memoria.buscar_casilla(operando_1))
             elif operador == 'imprime':
                 # print("imprime({})".format(destino))               
@@ -110,6 +117,14 @@ class MaquinaVirtual:
             elif operador == 'sec':
                 # por hacer listas
                 print("sec({}) = ".format(operando_1))
+            elif operador == 'VERIFICAR':
+                # print("VERIFICAR {} <= {} <= {}".format(operando_1, destino, opreando_2))
+                aux = self.memoria.buscar_casilla(destino)
+                if aux < operando_1 or aux > operando_2:
+                    raise Exception("Rango de indexacion invalido {} <= {} <= {}".format(operando_1, aux, operando_2))
+            elif operador == '+dir':
+                # print("{} +dir {} = ".format(self.memoria.buscar_casilla(operando_1), operando_2) + str(self.memoria.buscar_casilla(operando_1) + operando_2))
+                self.memoria.asignar_casilla(destino, self.memoria.buscar_casilla(operando_1) + operando_2)
             elif operador == 'GOTOF':
                 # print("GOTOF {} {}".format(operando_1, destino))
                 if (not self.memoria.buscar_casilla(operando_1)):
@@ -148,7 +163,7 @@ class MaquinaVirtual:
                 # print("ENDFUNC")
                 pass
             else:
-                print("Operador no reconocido: {}".format(operador))
+                raise Exception("Operador no reconocido: {}".format(operador))
             
             self.pila_apuntador[-1] += 1
 

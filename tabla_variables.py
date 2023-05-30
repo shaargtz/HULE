@@ -1,3 +1,5 @@
+from dimensiones import Dimensiones
+
 class Variables:
     def __init__(self, alcance):
         # nombre : (tipo, direccion, dimensiones)
@@ -32,7 +34,8 @@ class Variables:
                     'flot' : 11000,
                     'car' : 12000,
                     'cadena' : 13000,
-                    'bool' : 14000
+                    'bool' : 14000,
+                    'apuntador' : 15000
                 },
             }
         elif alcance == 'ctes':
@@ -41,20 +44,19 @@ class Variables:
             }
             self.contadores = {
                 'ctes' : {
-                    'ent' : 15000,
-                    'flot' : 16000,
-                    'car' : 17000,
-                    'cadena' : 18000,
-                    'bool' : 19000
+                    'ent' : 16000,
+                    'flot' : 17000,
+                    'car' : 18000,
+                    'cadena' : 19000
                 }
             }
 
-    def insertar_variable(self, tipo, var=None):
+    def insertar_variable(self, tipo, var=None, dims=None):
         if var:
             alcance = list(self.tabla.keys())[0]
             if not self.tabla[alcance].get(var):
-                self.tabla[alcance][var] = (tipo, self.contadores[alcance][tipo], 0)
-                self.contadores[alcance][tipo] += 1
+                self.tabla[alcance][var] = (tipo, self.contadores[alcance][tipo], Dimensiones(dims))
+                self.contadores[alcance][tipo] += self.tabla[alcance][var][2].total
                 return self.contadores[alcance][tipo] - 1
             else:
                 raise Exception("Variable " + var + " definida multiples veces")
@@ -62,7 +64,7 @@ class Variables:
             if 'temp' not in self.tabla.keys():
                 raise Exception("No se pueden instertar temporales a una tabla global")
             nueva_temp = tipo + str(self.contadores['temp'][tipo] % 1000)
-            self.tabla['temp'][nueva_temp] = (tipo, self.contadores['temp'][tipo], 0)
+            self.tabla['temp'][nueva_temp] = (tipo, self.contadores['temp'][tipo], Dimensiones(dims))
             self.contadores['temp'][tipo] += 1
             return self.contadores['temp'][tipo] - 1
         
@@ -74,3 +76,10 @@ class Variables:
             self.tabla['ctes'][cte] = (tipo, self.contadores['ctes'][tipo])
             self.contadores['ctes'][tipo] = self.contadores['ctes'][tipo] + 1
             return self.contadores['ctes'][tipo] - 1
+        
+    def insertar_dimensiones(self, var, dims):
+        alcance = list(self.tabla.keys())[0]
+        if self.tabla[alcance].get(var):
+            self.tabla[alcance][var][2].insertar_dimensiones(dims)
+        else:
+            raise Exception("Variable " + var + " multidimensional no definida")

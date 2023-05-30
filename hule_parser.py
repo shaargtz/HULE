@@ -49,17 +49,10 @@ def p_dec(t):
 
 def p_dec_var(t):
     '''
-    dec_var : dec_var_simple
-            | dec_lista
-            | dec_matriz
+    dec_var : p3 VAR tipo ID dimensiones p4 dec_var_prima ';'
     '''
     pila_tipos.pop()
-
-def p_dec_var_simple(t):
-    '''
-    dec_var_simple : p3 VAR tipo ID p4 dec_var_prima ';'
-    '''
-    pila_tipos.pop()
+    pila_o.pop()
 
 def p_p3(t):
     '''
@@ -75,12 +68,13 @@ def p_p4(t):
     '''
     p4 : nulo
     '''
-    pila_tipos.append(t[-2])
-    dir_funciones.insertar_variable(pila_func[-1], pila_tipos[-1], t[-1])
-    
+    pila_tipos.append(t[-3])
+    dir_funciones.insertar_variable(pila_func[-1], pila_tipos[-1], t[-2], t[-1])
+    pila_o.append(t[-2])
+
 def p_dec_var_prima(t):
     '''
-    dec_var_prima : ',' ID p5 dec_var_prima
+    dec_var_prima : ',' ID dimensiones p5 dec_var_prima p5_1
                   | nulo
     '''
 
@@ -88,43 +82,55 @@ def p_p5(t):
     '''
     p5 : nulo
     '''
-    dir_funciones.insertar_variable(pila_func[-1], pila_tipos[-1], t[-1])
-    
-# por hacer : corregir la declaracion de listas y matrices
+    dir_funciones.insertar_variable(pila_func[-1], pila_tipos[-1], t[-2], t[-1])
+    pila_o.append(t[-2])
 
-def p_dec_lista(t):
+def p_p5_1(t):
     '''
-    dec_lista : VAR tipo ID dimension dec_lista_prima ';'
+    p5_1 : nulo
     '''
-    
-def p_dec_lista_prima(t):
+    pila_o.pop()
+
+def p_dimensiones(t):
     '''
-    dec_lista_prima : ',' ID dimension dec_lista_prima
-                    | nulo
+    dimensiones : dimension dimension dimension
+                | dimension dimension
+                | dimension
+                | nulo
     '''
-    
-def p_dec_matriz(t):
+    if t[1]:
+        t[0] = []
+        for i in range(1, len(t)):
+            t[0].append(int(t[i]))
+
+def p_p18(t):
     '''
-    dec_matriz : VAR tipo ID dimension dimension dec_matriz_prima ';'
+    p18 : nulo
     '''
-    
-def p_dec_matriz_prima(t):
+    dir_funciones.insertar_dimensiones(pila_func[-1], pila_o[-1], [int(t[-3]), int(t[-2]), int(t[-1])])
+
+def p_p19(t):
     '''
-    dec_matriz_prima : ',' ID dimension dimension dec_matriz_prima
-                     | nulo
+    p19 : nulo
     '''
-    
+    dir_funciones.insertar_dimensiones(pila_func[-1], pila_o[-1], [int(t[-2]), int(t[-1])])
+
+def p_p20(t):
+    '''
+    p20 : nulo
+    '''
+    dir_funciones.insertar_dimensiones(pila_func[-1], pila_o[-1], [int(t[-1])])
+
 def p_dimension(t):
     '''
     dimension : '[' CTE_ENT ']'
     '''
+    t[0] = t[2]
 
 def p_dec_func(t):
     '''
     dec_func : FUNC super_tipo ID p6 '(' param ')' p16 '{' bloque '}' ';'
     '''
-    # todo: borrar tabla de variables al terminar de generar sus cuadruplos
-    # todo: parametros endfunc
     pila_func.pop()
     cuadruplos.append(['ENDFUNC', -1, -1, -1])
 
@@ -209,7 +215,7 @@ def p_asig(t):
     tipo_der = pila_tipos.pop()
     op_izq = pila_o.pop()
     tipo_izq = pila_tipos.pop()
-    if (tipo_izq != tipo_der):
+    if tipo_izq != tipo_der:
         raise Exception("Asignacion incompatible: " + tipo_izq + " = " + tipo_der)
     cuadruplos.append([t[2], op_der, -1, op_izq])
 
@@ -482,8 +488,6 @@ def p_cte(t):
     mem = dir_funciones.insertar_constante(pila_tipos[-1], t[1])
     pila_o.append(mem)
 
-# checar si usare constantes booleanas
-
 def p_p8_1(t):
     '''
     p8_1 : nulo
@@ -510,12 +514,90 @@ def p_p8_4(t):
 
 def p_var(t):
     '''
-    var : ID
-        | ID '[' hiper_exp ']'
-        | ID '[' hiper_exp ']' '[' hiper_exp ']'
+    var : ID '[' p14 hiper_exp ']' p17 '[' p14 hiper_exp ']' p17 '[' p14 hiper_exp ']' p17 p21
+        | ID '[' p14 hiper_exp ']' p17 '[' p14 hiper_exp ']' p17 p22
+        | ID '[' p14 hiper_exp ']' p17 p23
+        | ID p24
     '''
-    # hardcoded para unicamente la primer regla
-    direccion = dir_funciones.buscar_variable(pila_func[-1], t[1])
+
+def p_p21(t):
+    '''
+    p21 : nulo
+    '''
+    s3 = pila_o.pop()
+    s3tipo = pila_tipos.pop()
+    s2 = pila_o.pop()
+    s2tipo = pila_tipos.pop()
+    s1 = pila_o.pop()
+    s1tipo = pila_tipos.pop()
+    dirBase = dir_funciones.buscar_variable(pila_func[-1], t[-10])
+    dimensiones = dir_funciones.buscar_dimensiones(pila_func[-1], t[-10])
+    m = dir_funciones.buscar_m(pila_func[-1], t[-10])
+
+    if not all(tipo == 'ent' for tipo in [s1tipo, s2tipo, s3tipo]):
+        raise Exception("Los tipos de indexacion no son enteros")
+
+    # jalar dimensiones 1
+    cuadruplos.append(['VERIFICAR', -1, -1, s1])    
+    # jalar dimensiones 2
+    cuadruplos.append(['VERIFICAR', -1, -1, s2])
+    # jalar dimensiones 3
+    cuadruplos.append(['VERIFICAR', -1, -1, s3])    
+    # + dirBase
+    cuadruplos.append(['+dir', -1, dirBase, -1])    
+
+def p_p22(t):
+    '''
+    p22 : nulo
+    '''
+    s2 = pila_o.pop()
+    s2tipo = pila_tipos.pop()
+    s1 = pila_o.pop()
+    s1tipo = pila_tipos.pop()
+    dirBase = dir_funciones.buscar_variable(pila_func[-1], t[-7])
+    dimensiones = dir_funciones.buscar_dimensiones(pila_func[-1], t[-7])
+    m = dir_funciones.buscar_m(pila_func[-1], t[-7])
+
+    if not all(tipo == 'ent' for tipo in [s1tipo, s2tipo]):
+        raise Exception("Los tipos de indexacion no son enteros")
+
+    # jalar dimensiones 1
+    cuadruplos.append(['VERIFICAR', -1, -1, s1]) 
+    # jalar dimensiones 2
+    cuadruplos.append(['VERIFICAR', -1, -1, s2])
+    # s1 * m1
+    temp1 = dir_funciones.insertar_variable(pila_func[-1], 'ent')
+    cuadruplos.append(['*', s1, m[0], temp1])
+    # s1m1 + s2
+    temp2 = dir_funciones.insertar_variable(pila_func[-1], 'ent')
+    cuadruplos.append(['+', temp1, s2, temp2])
+    # + dirBase
+    temp3 = dir_funciones.insertar_variable(pila_func[-1], 'ent')
+    cuadruplos.append(['+dir', temp2, dirBase, temp3])
+    
+def p_p23(t):
+    '''
+    p23 : nulo
+    '''
+    s1 = pila_o.pop()
+    s1tipo = pila_tipos.pop()
+    dirBase = dir_funciones.buscar_variable(pila_func[-1], t[-6])
+    dimensiones = dir_funciones.buscar_dimensiones(pila_func[-1], t[-6])
+
+    if s1tipo != 'ent':
+        raise Exception("El tipo de indexacion no es entero")
+
+    cuadruplos.append(['VERIFICAR', 0, dimensiones[0], s1])
+    apt1 = dir_funciones.insertar_variable(pila_func[-1], 'apuntador')
+    cuadruplos.append(['+dir', s1, dirBase, apt1])
+    pila_o.append(apt1)
+    pila_tipos.append(checar_tipo_memoria(dirBase))
+
+def p_p24(t):
+    '''
+    p24 : nulo
+    '''
+    direccion = dir_funciones.buscar_variable(pila_func[-1], t[-1])
     pila_o.append(direccion)
     pila_tipos.append(checar_tipo_memoria(direccion))
 
@@ -588,11 +670,35 @@ hule()
 }
 '''
 
-parser.parse(codigo_2)
+codigo_3 = '''
+hule() 
+{
+    var ent A[5], cont, b;
+    b = 3;
+    A[1] = 6;
+    A[3] = 2;
+    A[0] = 13;
+    A[2] = 9;
+
+    A[4] = A[b * A[3] - 4];
+
+    cont = 0;
+
+    mientras(cont < 5) {
+        imprime(A[cont]);
+        cont = cont + 1;
+    }
+
+    
+}
+'''
+
+parser.parse(codigo_3)
 
 imprimir_cuadruplos(cuadruplos)
 imprimir_tabla_variables(dir_funciones)
 
 mv = MaquinaVirtual(cuadruplos, dir_funciones)
 mv.ejecutar()
+print('+--------------------------------------------------+')
 mv.imprimir_memoria()
