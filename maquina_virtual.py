@@ -119,9 +119,6 @@ class MaquinaVirtual:
             elif operador == 'abs':
                 # print("abs({}) = ".format(operando_1) + str(abs(self.memoria.buscar_casilla(operando_1))))
                 self.memoria.asignar_casilla(destino, abs(self.memoria.buscar_casilla(operando_1)))
-            elif operador == 'sec':
-                # por hacer listas
-                print("sec({}) = ".format(operando_1))
             elif operador == 'VERIFICAR':
                 # print("VERIFICAR {} <= {} <= {}".format(operando_1, destino, opreando_2))
                 aux = self.memoria.buscar_casilla(destino)

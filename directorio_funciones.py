@@ -4,7 +4,7 @@ class DirFunciones:
     def __init__(self):
         self.directorio = {
             # nombre : [tipo, variables, parametros, cuadruplo, return]
-            'hule' : ['vacia', None, None, None, None]
+            'hule' : ['vacia', Variables('local'), None, None, None]
         }
     
     def insertar_funcion(self, func, tipo):
