@@ -323,8 +323,8 @@ def p_hiper_exp(t):
 
 def p_super_exp_prima(t):
     '''
-    super_exp_prima : '&' p14 super_exp
-                    | '|' p14 super_exp
+    super_exp_prima : '&' p14 hiper_exp
+                    | '|' p14 hiper_exp
                     | nulo
     '''
     
@@ -346,10 +346,10 @@ def p_super_exp(t):
 
 def p_exp_prima(t):
     '''
-    exp_prima : '>' p14 exp
-              | '<' p14 exp
-              | IGUAL_QUE p14 exp
-              | DIFERENTE_QUE p14 exp
+    exp_prima : '>' p14 super_exp
+              | '<' p14 super_exp
+              | IGUAL_QUE p14 super_exp
+              | DIFERENTE_QUE p14 super_exp
               | nulo
     '''
     
@@ -371,8 +371,8 @@ def p_exp(t):
 
 def p_term_prima(t):
     '''
-    term_prima : '+' p14 term
-               | '-' p14 term
+    term_prima : '+' p14 exp
+               | '-' p14 exp
                | nulo
     '''
     
@@ -394,8 +394,8 @@ def p_term(t):
 
 def p_factor_prima(t):
     '''
-    factor_prima : '*' p14 factor
-                 | '/' p14 factor
+    factor_prima : '*' p14 term
+                 | '/' p14 term
                  | nulo
     '''
 
@@ -530,21 +530,28 @@ def p_p21(t):
     s2tipo = pila_tipos.pop()
     s1 = pila_o.pop()
     s1tipo = pila_tipos.pop()
-    dirBase = dir_funciones.buscar_variable(pila_func[-1], t[-10])
-    dimensiones = dir_funciones.buscar_dimensiones(pila_func[-1], t[-10])
-    m = dir_funciones.buscar_m(pila_func[-1], t[-10])
+    dirBase = dir_funciones.buscar_variable(pila_func[-1], t[-16])
+    dimensiones = dir_funciones.buscar_dimensiones(pila_func[-1], t[-16])
+    m = dir_funciones.buscar_m(pila_func[-1], t[-16])
 
     if not all(tipo == 'ent' for tipo in [s1tipo, s2tipo, s3tipo]):
         raise Exception("Los tipos de indexacion no son enteros")
 
-    # jalar dimensiones 1
-    cuadruplos.append(['VERIFICAR', -1, -1, s1])    
-    # jalar dimensiones 2
-    cuadruplos.append(['VERIFICAR', -1, -1, s2])
-    # jalar dimensiones 3
-    cuadruplos.append(['VERIFICAR', -1, -1, s3])    
-    # + dirBase
-    cuadruplos.append(['+dir', -1, dirBase, -1])    
+    cuadruplos.append(['VERIFICAR', 0, dimensiones[0], s1]) 
+    cuadruplos.append(['VERIFICAR', 0, dimensiones[1], s2])
+    cuadruplos.append(['VERIFICAR', 0, dimensiones[2], s3])
+    temp1 = dir_funciones.insertar_variable(pila_func[-1], 'ent')
+    cuadruplos.append(['*dir', s1, m[0], temp1])
+    temp2 = dir_funciones.insertar_variable(pila_func[-1], 'ent')
+    cuadruplos.append(['*dir', s2, m[1], temp2])
+    temp3 = dir_funciones.insertar_variable(pila_func[-1], 'ent')
+    cuadruplos.append(['+', temp1, temp2, temp3])
+    temp4 = dir_funciones.insertar_variable(pila_func[-1], 'ent')
+    cuadruplos.append(['+', temp3, s3, temp4])
+    apt = dir_funciones.insertar_variable(pila_func[-1], 'apuntador')
+    cuadruplos.append(['+dir', temp4, dirBase, apt])
+    pila_o.append(apt)
+    pila_tipos.append(checar_tipo_memoria(dirBase))
 
 def p_p22(t):
     '''
@@ -554,9 +561,9 @@ def p_p22(t):
     s2tipo = pila_tipos.pop()
     s1 = pila_o.pop()
     s1tipo = pila_tipos.pop()
-    dirBase = dir_funciones.buscar_variable(pila_func[-1], t[-7])
-    dimensiones = dir_funciones.buscar_dimensiones(pila_func[-1], t[-7])
-    m = dir_funciones.buscar_m(pila_func[-1], t[-7])
+    dirBase = dir_funciones.buscar_variable(pila_func[-1], t[-11])
+    dimensiones = dir_funciones.buscar_dimensiones(pila_func[-1], t[-11])
+    m = dir_funciones.buscar_m(pila_func[-1], t[-11])
 
     if not all(tipo == 'ent' for tipo in [s1tipo, s2tipo]):
         raise Exception("Los tipos de indexacion no son enteros")
@@ -564,10 +571,10 @@ def p_p22(t):
     cuadruplos.append(['VERIFICAR', 0, dimensiones[0], s1]) 
     cuadruplos.append(['VERIFICAR', 0, dimensiones[1], s2])
     temp1 = dir_funciones.insertar_variable(pila_func[-1], 'ent')
-    cuadruplos.append(['*', s1, m[0], temp1])
+    cuadruplos.append(['*dir', s1, m[0], temp1])
     temp2 = dir_funciones.insertar_variable(pila_func[-1], 'ent')
     cuadruplos.append(['+', temp1, s2, temp2])
-    apt = dir_funciones.insertar_variable(pila_func[-1], 'ent')
+    apt = dir_funciones.insertar_variable(pila_func[-1], 'apuntador')
     cuadruplos.append(['+dir', temp2, dirBase, apt])
     pila_o.append(apt)
     pila_tipos.append(checar_tipo_memoria(dirBase))
@@ -670,14 +677,16 @@ hule()
 codigo_3 = '''
 hule() 
 {
-    var ent A[5], cont, b;
+    var ent A[5], cont, b, c;
     b = 3;
-    A[1] = 6;
-    A[3] = 2;
     A[0] = 13;
+    A[1] = 6;
     A[2] = 9;
-
+    A[3] = 2;
     A[4] = A[b * A[3] - 4];
+
+    c = A[0] + A[1] + A[2] + A[3] + A[4];
+    imprime(c);
 
     cont = 0;
 
@@ -690,31 +699,88 @@ hule()
 }
 '''
 
-codigo_3 = '''
+codigo_4 = '''
 hule() 
 {
-    var ent A[2][3], cont, b;
+    var ent A[2][3], i, j;
 
     i = 0;
     j = 0;
 
     mientras(i < 2) {
         mientras(j < 3) {
-            A[i][j] = i * j;
+            A[i][j] = i + j;
+            j = j + 1;
         }
+        j = 0;
+        i = i + 1;
     }
+
+    i = 0;
+    j = 0;
 
     mientras(j < 3) {
         mientras(i < 2) {
            imprime(A[i][j]);
+           i = i + 1;
         }
+        i = 0;
+        j = j + 1;
     }
 
     
 }
 '''
 
-parser.parse(codigo_3)
+codigo_4 = '''
+hule() 
+{
+    var ent A[2][3][4], i, j, k;
+
+    i = 0;
+    j = 0;
+    k = 0;
+
+    mientras(i < 2) {
+        mientras(j < 3) {
+            mientras (k < 4) {
+                A[i][j][k] = i + j + k;
+                k = k + 1;
+            }
+            k = 0;
+            j = j + 1;
+        }
+        j = 0;
+        i = i + 1;
+    }
+
+    i = 0;
+    j = 0;
+    k = 0;
+
+    mientras(i < 2) {
+        mientras(j < 3) {
+            mientras (k < 4) {
+                imprime(A[i][j][k]);
+                k = k + 1;
+            }
+            k = 0;
+            j = j + 1;
+        }
+        j = 0;
+        i = i + 1;
+    }
+
+    var ent x;
+    x = 8;
+
+    imprime('-----');
+    imprime(A[0][0][0]);
+    imprime(A[(x / 2) - 3][A[0][x - 8][0]][3]);
+}
+'''
+
+parser.parse(codigo_4)
 
 imprimir_cuadruplos(cuadruplos)
 imprimir_tabla_variables(dir_funciones)

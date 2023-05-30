@@ -69,11 +69,20 @@ class VonNeumann:
         tipo = checar_tipo_memoria(dir)
         indice = dir % 1000
         if alcance in ['local', 'temp']:
-            return self.pila_funciones[-1].espacios[alcance][tipo][indice]
+            ret = self.pila_funciones[-1].espacios[alcance][tipo][indice]
+            if ret == None:
+                raise Exception("Casilla de memoria {} no encontrada".format(dir))
+            return ret
         elif alcance == 'glob':
-            return self.memoria_global.espacios[alcance][tipo][indice]
+            ret = self.memoria_global.espacios[alcance][tipo][indice]
+            if ret == None:
+                raise Exception("Casilla de memoria {} no encontrada".format(dir))
+            return ret
         elif alcance == 'ctes':
-            return self.memoria_ctes.espacios[alcance][tipo][indice]
+            ret = self.memoria_ctes.espacios[alcance][tipo][indice]
+            if ret == None:
+                raise Exception("Casilla de memoria {} no encontrada".format(dir))
+            return ret
 
     def asignar_casilla(self, dir, val):
         alcance = checar_alcance_memoria(dir)

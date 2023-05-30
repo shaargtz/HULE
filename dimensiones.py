@@ -12,10 +12,6 @@ class Dimensiones:
                 m = m / dims[x] # calcular M0, M1, ...
                 self.data[x][1] = int(m)
 
-            print('dimensiones')
-            for i in self.data:
-                print(i)
-
     def retornar_dimensiones(self):
         dims = []
         for d in self.data:
