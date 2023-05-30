@@ -561,19 +561,16 @@ def p_p22(t):
     if not all(tipo == 'ent' for tipo in [s1tipo, s2tipo]):
         raise Exception("Los tipos de indexacion no son enteros")
 
-    # jalar dimensiones 1
-    cuadruplos.append(['VERIFICAR', -1, -1, s1]) 
-    # jalar dimensiones 2
-    cuadruplos.append(['VERIFICAR', -1, -1, s2])
-    # s1 * m1
+    cuadruplos.append(['VERIFICAR', 0, dimensiones[0], s1]) 
+    cuadruplos.append(['VERIFICAR', 0, dimensiones[1], s2])
     temp1 = dir_funciones.insertar_variable(pila_func[-1], 'ent')
     cuadruplos.append(['*', s1, m[0], temp1])
-    # s1m1 + s2
     temp2 = dir_funciones.insertar_variable(pila_func[-1], 'ent')
     cuadruplos.append(['+', temp1, s2, temp2])
-    # + dirBase
-    temp3 = dir_funciones.insertar_variable(pila_func[-1], 'ent')
-    cuadruplos.append(['+dir', temp2, dirBase, temp3])
+    apt = dir_funciones.insertar_variable(pila_func[-1], 'ent')
+    cuadruplos.append(['+dir', temp2, dirBase, apt])
+    pila_o.append(apt)
+    pila_tipos.append(checar_tipo_memoria(dirBase))
     
 def p_p23(t):
     '''
@@ -588,9 +585,9 @@ def p_p23(t):
         raise Exception("El tipo de indexacion no es entero")
 
     cuadruplos.append(['VERIFICAR', 0, dimensiones[0], s1])
-    apt1 = dir_funciones.insertar_variable(pila_func[-1], 'apuntador')
-    cuadruplos.append(['+dir', s1, dirBase, apt1])
-    pila_o.append(apt1)
+    apt = dir_funciones.insertar_variable(pila_func[-1], 'apuntador')
+    cuadruplos.append(['+dir', s1, dirBase, apt])
+    pila_o.append(apt)
     pila_tipos.append(checar_tipo_memoria(dirBase))
 
 def p_p24(t):
@@ -687,6 +684,30 @@ hule()
     mientras(cont < 5) {
         imprime(A[cont]);
         cont = cont + 1;
+    }
+
+    
+}
+'''
+
+codigo_3 = '''
+hule() 
+{
+    var ent A[2][3], cont, b;
+
+    i = 0;
+    j = 0;
+
+    mientras(i < 2) {
+        mientras(j < 3) {
+            A[i][j] = i * j;
+        }
+    }
+
+    mientras(j < 3) {
+        mientras(i < 2) {
+           imprime(A[i][j]);
+        }
     }
 
     

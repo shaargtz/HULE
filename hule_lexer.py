@@ -60,8 +60,8 @@ t_DIFERENTE_QUE = r'!='
 
 t_CTE_ENT = r'[0-9]+'
 t_CTE_FLOT = r'[0-9]+\.[0-9]+'
-t_CTE_CAR = r'\'[a-zA-Z]\''
-t_CTE_CADENA = r'\'[a-zA-Z]{2,}\''
+t_CTE_CAR = r'\'.\''
+t_CTE_CADENA = r'\'.{2,}\''
 
 t_ignore = ' \t'
 
