@@ -1,4 +1,4 @@
-from tabla_variables import Variables
+from src.tabla_variables import Variables
  
 class DirFunciones:
     def __init__(self):

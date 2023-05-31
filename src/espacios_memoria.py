@@ -1,4 +1,4 @@
-from utilidad import *
+from src.utilidad import *
 
 class EspaciosMemoria:
     def __init__(self):

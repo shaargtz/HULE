@@ -1,7 +1,7 @@
-from hule_parser import parser, cuadruplos, dir_funciones
-from codigos_prueba import *
-from maquina_virtual import MaquinaVirtual
-from utilidad import *
+from src.hule_parser import parser, cuadruplos, dir_funciones
+from src.codigos_prueba import *
+from src.maquina_virtual import MaquinaVirtual
+from src.utilidad import *
 
 nombre_archivo = input('Escribe el nombre del archivo a correr: ')
 debug = input("¿Quieres imprimir los datos de debug? s/[n] :") or 'n'

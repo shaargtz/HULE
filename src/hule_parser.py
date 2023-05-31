@@ -1,8 +1,8 @@
 from ply import yacc
-from hule_lexer import tokens
-from directorio_funciones import DirFunciones
-from cubo_semantico import CuboSemantico
-from utilidad import *
+from src.hule_lexer import tokens
+from src.directorio_funciones import DirFunciones
+from src.cubo_semantico import CuboSemantico
+from src.utilidad import *
 
 dir_funciones = DirFunciones()
 cubo_semantico = CuboSemantico()
@@ -456,7 +456,7 @@ def p_conversion(t):
     conversion : tipo '(' p14 hiper_exp ')' p17
     '''
     valor = pila_o.pop()
-    print(valor, t[1], pila_tipos.pop())
+    pila_tipos.pop()
     temp = dir_funciones.insertar_variable(pila_func[-1], t[1])
     cuadruplos.append([t[1], valor, -1, temp])
     pila_o.append(temp)

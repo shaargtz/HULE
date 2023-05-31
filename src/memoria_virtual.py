@@ -1,5 +1,5 @@
-from espacios_memoria import EspaciosMemoria
-from utilidad import checar_tipo_memoria, checar_alcance_memoria
+from src.espacios_memoria import EspaciosMemoria
+from src.utilidad import *
 
 class VonNeumann:
     def __init__(self):
@@ -80,8 +80,7 @@ class VonNeumann:
             return ret
         elif alcance == 'glob':
             ret = self.memoria_global.espacios[alcance][tipo][indice]
-            if ret == None:
-                print(self.memoria_global.espacios[alcance])
+            if ret == None: 
                 raise Exception("Casilla de memoria {} no encontrada".format(dir))
             return ret
         elif alcance == 'ctes':

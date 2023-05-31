@@ -1,4 +1,4 @@
-from dimensiones import Dimensiones
+from src.dimensiones import Dimensiones
 
 class Variables:
     def __init__(self, alcance):

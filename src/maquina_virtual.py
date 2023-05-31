@@ -1,9 +1,9 @@
 import math
 import random
 import pprint
-from memoria_virtual import VonNeumann
-from utilidad import *
 import plotext as plt
+from src.memoria_virtual import VonNeumann
+from src.utilidad import *
 
 class MaquinaVirtual:
     def __init__(self, cuadruplos, dir_func):
