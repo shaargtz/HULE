@@ -18,7 +18,7 @@ class MaquinaVirtual:
             operando_1 = self.cuadruplos[self.pila_apuntador[-1]][1]
             operando_2 = self.cuadruplos[self.pila_apuntador[-1]][2]
             destino = self.cuadruplos[self.pila_apuntador[-1]][3]
-            if operador not in ['+dir', '*dir']:
+            if operador not in ['+dir', '*dir', 'ERA']:
                 if operando_1 >= 15000 and operando_1 < 16000:
                     operando_1 = self.memoria.buscar_casilla(operando_1)
                 if operando_2 >= 15000 and operando_2 < 16000:

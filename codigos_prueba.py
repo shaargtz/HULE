@@ -226,3 +226,22 @@ hule() {
     graficar(A, B);
 }
 '''
+
+codigo_8 = '''
+func vacia f(ent a) {
+    imprime(a);
+    f(a + 1);
+};
+hule() {
+    f(1);
+}
+'''
+
+codigo_9 = '''
+hule() {
+    var ent A[1001];
+    por (i en 1001) {
+        A[i] = i;
+    }
+}
+'''

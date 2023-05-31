@@ -56,7 +56,10 @@ class Variables:
             alcance = list(self.tabla.keys())[0]
             if not self.tabla[alcance].get(var):
                 self.tabla[alcance][var] = (tipo, self.contadores[alcance][tipo], Dimensiones(dims))
+                antes = self.contadores[alcance][tipo]
                 self.contadores[alcance][tipo] += self.tabla[alcance][var][2].total
+                if antes // 1000 != self.contadores[alcance][tipo] // 1000:
+                    raise Exception("Limite de memoria de tipo {} {} excedidO".format(alcance, tipo))
                 return self.contadores[alcance][tipo] - 1
             else:
                 raise Exception("Variable " + var + " definida multiples veces")

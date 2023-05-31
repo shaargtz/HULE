@@ -750,12 +750,13 @@ def p_error(t):
 
 parser = yacc.yacc()
 
-parser.parse(codigo_7)
+parser.parse(codigo_9)
 
 imprimir_cuadruplos(cuadruplos)
 imprimir_tabla_variables(dir_funciones)
 
 mv = MaquinaVirtual(cuadruplos, dir_funciones)
+print('+-------------------EJECUCION-------------------+')
 mv.ejecutar()
-print('+--------------------------------------------------+')
+print('+-----------------------------------------------+')
 mv.imprimir_memoria()

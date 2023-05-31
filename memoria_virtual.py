@@ -40,6 +40,7 @@ class VonNeumann:
         self.nueva_memoria = []
         self.memoria_global = EspaciosMemoria()
         self.memoria_ctes = EspaciosMemoria()
+        self.total_apilado = 0
 
     def instanciar(self, alcance, contadores):
         if alcance == 'hule':
@@ -60,8 +61,12 @@ class VonNeumann:
  
     def apilar_memoria(self):
         self.pila_funciones.append(self.nueva_memoria.pop())
+        self.total_apilado += len(self.pila_funciones[-1].espacios)
+        if self.total_apilado > 11000:
+            raise Exception("Limite de memoria en la pila excedido")
 
     def dormir_memoria(self):
+        self.total_apilado -= len(self.pila_funciones[-1].espacios)
         self.pila_funciones.pop()
 
     def buscar_casilla(self, dir):
