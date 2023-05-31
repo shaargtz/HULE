@@ -3,6 +3,7 @@ import random
 import pprint
 from memoria_virtual import VonNeumann
 from utilidad import *
+import plotext as plt
 
 class MaquinaVirtual:
     def __init__(self, cuadruplos, dir_func):
@@ -66,7 +67,7 @@ class MaquinaVirtual:
                 print(self.memoria.buscar_casilla(destino))
             elif operador == 'sen':
                 # print("sen({}) = ".format(operando_1) + str(math.sen(self.memoria.buscar_casilla(operando_1))))
-                self.memoria.asignar_casilla(destino, math.sen(self.memoria.buscar_casilla(operando_1)))
+                self.memoria.asignar_casilla(destino, math.sin(self.memoria.buscar_casilla(operando_1)))
             elif operador == 'cos':
                 # print("cos({}) = ".format(operando_1) + str(math.cos(self.memoria.buscar_casilla(operando_1))))
                 self.memoria.asignar_casilla(destino, math.cos(self.memoria.buscar_casilla(operando_1)))
@@ -75,7 +76,7 @@ class MaquinaVirtual:
                 self.memoria.asignar_casilla(destino, math.tan(self.memoria.buscar_casilla(operando_1)))
             elif operador == 'senh':
                 # print("senh({}) = ".format(operando_1) + str(math.senh(self.memoria.buscar_casilla(operando_1))))
-                self.memoria.asignar_casilla(destino, math.senh(self.memoria.buscar_casilla(operando_1)))
+                self.memoria.asignar_casilla(destino, math.sinh(self.memoria.buscar_casilla(operando_1)))
             elif operador == 'cosh':
                 # print("cosh({}) = ".format(operando_1) + str(math.cosh(self.memoria.buscar_casilla(operando_1))))
                 self.memoria.asignar_casilla(destino, math.cosh(self.memoria.buscar_casilla(operando_1)))
@@ -89,17 +90,47 @@ class MaquinaVirtual:
                 # print("max({}, {}) = ".format(operando_1, operando_2) + str(max(self.memoria.buscar_casilla(operando_1), self.memoria.buscar_casilla(operando_2))))
                 self.memoria.asignar_casilla(destino, max(self.memoria.buscar_casilla(operando_1), self.memoria.buscar_casilla(operando_2)))
             elif operador == 'largo':
-                # por hacer listas
-                print("largo de la lista {} = ".format(operando_1))
+                # print("largo({}) = ".format(operando1, operando_1))
+                self.memoria.asignar_casilla(destino, operando_2)
             elif operador == 'media':
-                # por hacer listas
-                print("media de la lista {} = ".format(operando_1))
+                acum = 0
+                for i in range(operando_2):
+                    acum += self.memoria.buscar_casilla(operando_1 + i)
+                media = acum / operando_2
+                # print("media de la lista {} = {}".format(operando_1, media))
+                self.memoria.asignar_casilla(destino, media)
             elif operador == 'moda':
-                # por hacer listas
-                print("moda de la lista {} = ".format(operando_1))
+                valores = {}
+                for i in range(operando_2):
+                    val = self.memoria.buscar_casilla(operando_1 + i)
+                    if val in valores.keys():
+                        valores[val] += 1
+                    else:
+                        valores[val] = 1
+                max_key = max(valores, key=valores.get)
+                # print("moda de la lista {} = {}".format(operando_1, max_key))
+                self.memoria.asignar_casilla(destino, max_key)
             elif operador == 'mediana':
-                # por hacer listas
-                print("mediana de la lista {} = ".format(operando_1))
+                valores = []
+                for i in range(operando_2):
+                    valores.append(self.memoria.buscar_casilla(operando_1 + i))
+                orden = sorted(valores)
+                if operando_2 % 2:
+                    mediana = orden[operando_2 // 2]
+                else:
+                    mediana = (orden[operando_2 // 2] + orden[(operando_2 // 2) + 1] / 2)
+                # print("mediana de la lista {} = {}".format(operando_1, mediana))
+                self.memoria.asignar_casilla(destino, mediana)
+            elif operador == 'graficar':
+                # print("graficar({}, {})".format(operando_1, operando_2))
+                valores = []
+                etiquetas = []
+                for i in range(destino):
+                    valores.append(self.memoria.buscar_casilla(operando_1 + i))
+                    etiquetas.append(self.memoria.buscar_casilla(operando_2 + i))
+                plt.bar(etiquetas, valores)
+                plt.theme('clear')
+                plt.show()
             elif operador == 'piso':
                 # print("piso({}) = ".format(operando_1) + str(math.floor(self.memoria.buscar_casilla(operando_1))))
                 self.memoria.asignar_casilla(destino, math.floor(self.memoria.buscar_casilla(operando_1)))
@@ -107,15 +138,16 @@ class MaquinaVirtual:
                 # print("techo({}) = ".format(operando_1) + str(math.ceil(self.memoria.buscar_casilla(operando_1))))
                 self.memoria.asignar_casilla(destino, math.ceil(self.memoria.buscar_casilla(operando_1)))
             elif operador == 'aleatorio':
-                rand = random.randint()
-                # print("aleatorio() = {}".format(rand))
+                # print(operando_1, operando_2)
+                rand = random.randint(self.memoria.buscar_casilla(operando_1), self.memoria.buscar_casilla(operando_2))
+                # print("aleatorio({}, {}) = {}".format(operando_1, operando_2, rand))
                 self.memoria.asignar_casilla(destino, rand)
             elif operador == 'poder':
                 # print("{} ^ {} = ".format(operando_1, operando_2) + str(pow(self.memoria.buscar_casilla(operando_1), self.memoria.buscar_casilla(operando_2))))
                 self.memoria.asignar_casilla(destino, pow(self.memoria.buscar_casilla(operando_1), self.memoria.buscar_casilla(operando_2)))
             elif operador == 'log':
-                # print("{} log {} = ".format(operando_1, operando_2) + str(math.log(self.memoria.buscar_casilla(operando_1), self.memoria.buscar_casilla(operando_2))))
-                self.memoria.asignar_casilla(destino, math.log(self.memoria.buscar_casilla(operando_1), self.memoria.buscar_casilla(operando_2)))
+                # print("log {} = ".format(operando_1) + str(math.log(self.memoria.buscar_casilla(operando_1))))
+                self.memoria.asignar_casilla(destino, math.log(self.memoria.buscar_casilla(operando_1)))
             elif operador == 'abs':
                 # print("abs({}) = ".format(operando_1) + str(abs(self.memoria.buscar_casilla(operando_1))))
                 self.memoria.asignar_casilla(destino, abs(self.memoria.buscar_casilla(operando_1)))

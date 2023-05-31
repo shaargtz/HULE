@@ -17,4 +17,5 @@ Se genera el mapa de memoria virtual con los alcances correspondientes.
 La maquina virtual ejecuta los cuadruplos y modifica la memoria necesaria.
 <br>
 <br>
+Se requiere installar plotext con `pip install plotext`
 Para ejecutarlo solo se debe correr `python3 hule_parser.py`

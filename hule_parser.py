@@ -104,24 +104,6 @@ def p_dimensiones(t):
         for i in range(1, len(t)):
             t[0].append(int(t[i]))
 
-def p_p18(t):
-    '''
-    p18 : nulo
-    '''
-    dir_funciones.insertar_dimensiones(pila_func[-1], pila_o[-1], [int(t[-3]), int(t[-2]), int(t[-1])])
-
-def p_p19(t):
-    '''
-    p19 : nulo
-    '''
-    dir_funciones.insertar_dimensiones(pila_func[-1], pila_o[-1], [int(t[-2]), int(t[-1])])
-
-def p_p20(t):
-    '''
-    p20 : nulo
-    '''
-    dir_funciones.insertar_dimensiones(pila_func[-1], pila_o[-1], [int(t[-1])])
-
 def p_dimension(t):
     '''
     dimension : '[' CTE_ENT ']'
@@ -206,8 +188,32 @@ def p_est(t):
         | llama_func_est
         | retorno
         | imprimir
+        | graf
     '''
-    
+
+def p_graf(t):
+    '''
+    graf : GRAFICAR '(' ID ',' ID ')' ';' p27
+    '''
+
+def p_p27(t):
+    '''
+    p27 : nulo
+    '''
+    dir_val = dir_funciones.buscar_variable(pila_func[-1], t[-5])
+    dims_val = dir_funciones.buscar_dimensiones(pila_func[-1], t[-5])
+    dir_etiq = dir_funciones.buscar_variable(pila_func[-1], t[-3])
+    dims_etiq = dir_funciones.buscar_dimensiones(pila_func[-1], t[-3])
+    if checar_tipo_memoria(dir_etiq) not in ['car', 'cadena']:
+        raise Exception("Funcion graficar() que el segundo arreglo sea de tipo caracter o cadena")
+    if len(dims_val) < 1 or len(dims_etiq) < 1:
+        raise Exception("Funcion graficar() espera dos argumento tipo arreglo y encontro una variable")
+    elif len(dims_val) > 1 or len(dims_etiq) > 1:
+        raise Exception("Funcion graficar() espera dos arreglos de una dimension y encontro uno de {}".format(max(len(dims_val), len(dims_etiq))))
+    elif dims_val[0] != dims_etiq[0]:
+        raise Exception("Funcion graficar() espera dos arreglos del mismo tamaño")
+    cuadruplos.append(['graficar', dir_val, dir_etiq, dims_val[0] + 1])
+
 def p_asig(t):
     '''
     asig : var '=' hiper_exp ';'
@@ -435,11 +441,115 @@ def p_p17(t):
 
 def p_factor(t):
     '''
-    factor : llama_func_exp
+    factor : func_esp
+           | llama_func_exp
            | cte
            | var
            | sub_exp
     '''
+
+def p_func_esp(t):
+    '''
+    func_esp : func_esp_1
+             | func_esp_2
+    '''
+
+def p_func_esp_1(t):
+    '''
+    func_esp_1 : SEN '(' hiper_exp ')' p18
+               | COS '(' hiper_exp ')' p18
+               | TAN '(' hiper_exp ')' p18
+               | SENH '(' hiper_exp ')' p18
+               | COSH '(' hiper_exp ')' p18
+               | TANH '(' hiper_exp ')' p18
+               | LOG '(' hiper_exp ')' p18
+               | ABS '(' hiper_exp ')' p18
+               | PISO '(' hiper_exp ')' p18
+               | TECHO '(' hiper_exp ')' p18
+               | MEDIA '(' ID ')' p26
+               | MODA '(' ID ')' p26
+               | MEDIANA '(' ID ')' p26
+               | LARGO '(' ID ')' p26
+    '''
+
+def p_p18(t):
+    '''
+    p18 : nulo
+    '''
+    val = pila_o.pop()
+    val_t = pila_tipos.pop()
+    if val_t not in ['ent', 'flot']:
+        raise Exception("Funcion {}() espera un argumento entero o flotante".format(t[-4]))
+    if t[-4] == 'abs':
+        temp_t = val_t
+    elif t[-4] in ['piso', 'techo']:
+        temp_t = 'ent'
+    else:
+        temp_t = 'flot'
+    temp = dir_funciones.insertar_variable(pila_func[-1], temp_t)
+    cuadruplos.append([t[-4], val, -1, temp])
+    pila_o.append(temp)
+    pila_tipos.append(temp_t)
+
+def p_p26(t):
+    '''
+    p26 : nulo
+    '''
+    dir = dir_funciones.buscar_variable(pila_func[-1], t[-2])
+    dims = dir_funciones.buscar_dimensiones(pila_func[-1], t[-2])
+    dir_t = checar_tipo_memoria(dir)
+    if len(dims) < 1:
+        raise Exception("Funcion {}() espera un argumento tipo arreglo y encontro una variable".format(t[-4]))
+    elif len(dims) > 1:
+        raise Exception("Funcion {}() espera un arreglo de una dimension y encontro uno de {}".format(t[-4], len(dims)))
+    if t[-4] == 'largo':
+        temp_t = 'ent'
+    else:
+        temp_t = 'flot'
+        if dir_t not in ['ent', 'flot']:
+            raise Exception("Funcion {}() espera un argumento tipo lista ent/flot y encontro una lista {}".format(t[-4], dir_t ))
+    temp = dir_funciones.insertar_variable(pila_func[-1], temp_t)
+    cuadruplos.append([t[-4], dir, dims[0] + 1, temp])
+    pila_o.append(temp)
+    pila_tipos.append(temp_t)
+
+def p_func_esp_2(t):
+    '''
+    func_esp_2 : ALEATORIO '(' hiper_exp ',' hiper_exp ')' p19
+               | PODER '(' hiper_exp ',' hiper_exp ')' p19
+               | MIN '(' hiper_exp ',' hiper_exp ')' p20
+               | MAX '(' hiper_exp ',' hiper_exp ')' p20
+    '''
+
+def p_p19(t):
+    '''
+    p19 : nulo
+    '''
+    op1 = pila_o.pop()
+    op2 = pila_o.pop()
+    op1_t = pila_tipos.pop()
+    op2_t = pila_tipos.pop()
+    if op1_t != 'ent' or op2_t != 'ent':
+        raise Exception("Funcion {}() espera dos argumentos de tipo entero".format(t[-6]))
+    temp = dir_funciones.insertar_variable(pila_func[-1], op1_t)
+    cuadruplos.append([t[-6], op2, op1, temp])
+    pila_o.append(temp)
+    pila_tipos.append(op1_t)
+
+def p_p20(t):
+    '''
+    p20 : nulo
+    '''
+    op1 = pila_o.pop()
+    op2 = pila_o.pop()
+    op1_t = pila_tipos.pop()
+    op2_t = pila_tipos.pop()
+    if op2_t != op1_t:
+        raise Exception("Funcion {}() espera dos argumentos de tipo entero o dos de tipo flotante".format(t[-6]))
+    temp = dir_funciones.insertar_variable(pila_func[-1], op1_t)
+    cuadruplos.append([t[-6], op2, op1, temp])
+    pila_o.append(temp)
+    pila_tipos.append(op1_t)
 
 def p_sub_exp(t):
     '''
@@ -640,7 +750,7 @@ def p_error(t):
 
 parser = yacc.yacc()
 
-parser.parse(codigo_6)
+parser.parse(codigo_7)
 
 imprimir_cuadruplos(cuadruplos)
 imprimir_tabla_variables(dir_funciones)

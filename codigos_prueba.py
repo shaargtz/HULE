@@ -172,3 +172,57 @@ hule() {
     }
 }
 '''
+
+codigo_7 = '''
+hule() {
+    var ent A[5];
+    var flot B[5];
+    por(i en 5) {
+        A[i] = aleatorio(5, 10);
+    }
+
+    por(j en 5) {
+        imprime(A[4 - j]);
+    }
+
+    imprime('-------');
+
+    imprime(poder(2, 4));
+
+    imprime('-------');
+
+    imprime(min(A[4], A[3]));
+
+    imprime('-------');
+
+    imprime(largo(A));
+
+    imprime('-------');
+
+    imprime(media(A));
+    imprime(moda(A));
+    imprime(mediana(A));
+
+    imprime('-------');
+
+    graficar(A);
+}
+'''
+
+codigo_7 = '''
+hule() {
+    var ent A[5];
+    por(i en 5) {
+        A[i] = aleatorio(1, 5);
+    }
+
+    var cadena B[5];
+    B[0] = 'aaa';
+    B[1] = 'bbb';
+    B[2] = 'ccc';
+    B[3] = 'ddd';
+    B[4] = 'eee';
+
+    graficar(A, B);
+}
+'''

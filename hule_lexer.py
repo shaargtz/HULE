@@ -13,7 +13,6 @@ tokens = [
 reserved = {
     'hule' : 'HULE',
     'func' : 'FUNC',
-    'tipo' : 'TIPO',
     'var' : 'VAR',
     'si' : 'SI',
     'sino' : 'SINO',
@@ -27,8 +26,6 @@ reserved = {
     'en' : 'EN',
     'mientras' : 'MIENTRAS',
     'regresa' : 'REGRESA',
-    'verdad' : 'VERDAD',
-    'falso' : 'FALSO',
     'imprime' : 'IMPRIME',
     'sen' : 'SEN',
     'cos' : 'COS',
@@ -48,7 +45,7 @@ reserved = {
     'poder' : 'PODER',
     'log' : 'LOG',
     'abs' : 'ABS',
-    'sec' : 'SEC'
+    'graficar' : 'GRAFICAR',
 }
 
 literals = ',;][}{)(=+-*/><=&|'
