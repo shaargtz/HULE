@@ -90,7 +90,7 @@ class MaquinaVirtual:
                 # print("max({}, {}) = ".format(operando_1, operando_2) + str(max(self.memoria.buscar_casilla(operando_1), self.memoria.buscar_casilla(operando_2))))
                 self.memoria.asignar_casilla(destino, max(self.memoria.buscar_casilla(operando_1), self.memoria.buscar_casilla(operando_2)))
             elif operador == 'largo':
-                # print("largo({}) = ".format(operando1, operando_1))
+                # print("largo({}) = ".format(operando_1))
                 self.memoria.asignar_casilla(destino, operando_2)
             elif operador == 'media':
                 acum = 0
@@ -118,7 +118,7 @@ class MaquinaVirtual:
                 if operando_2 % 2:
                     mediana = orden[operando_2 // 2]
                 else:
-                    mediana = (orden[operando_2 // 2] + orden[(operando_2 // 2) + 1] / 2)
+                    mediana = (orden[operando_2 // 2] + orden[(operando_2 // 2) + 1]) / 2
                 # print("mediana de la lista {} = {}".format(operando_1, mediana))
                 self.memoria.asignar_casilla(destino, mediana)
             elif operador == 'graficar':
@@ -152,7 +152,7 @@ class MaquinaVirtual:
                 # print("abs({}) = ".format(operando_1) + str(abs(self.memoria.buscar_casilla(operando_1))))
                 self.memoria.asignar_casilla(destino, abs(self.memoria.buscar_casilla(operando_1)))
             elif operador == 'VERIFICAR':
-                # print("VERIFICAR {} <= {} <= {}".format(operando_1, destino, opreando_2))
+                # print("VERIFICAR {} <= {} <= {}".format(operando_1, destino, operando_2))
                 aux = self.memoria.buscar_casilla(destino)
                 if aux < operando_1 or aux > operando_2:
                     raise Exception("Rango de indexacion invalido {} <= {} <= {}".format(operando_1, aux, operando_2))
@@ -230,7 +230,7 @@ class MaquinaVirtual:
                 conversion = bool(valor)
                 self.memoria.asignar_casilla(destino, conversion)
             elif operador == 'ENDPROG':
-                # print("ENDFUNC")
+                # print("ENDPROG")
                 pass
             else:
                 raise Exception("Operador no reconocido: {}".format(operador))

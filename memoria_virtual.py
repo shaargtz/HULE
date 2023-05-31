@@ -81,6 +81,7 @@ class VonNeumann:
         elif alcance == 'glob':
             ret = self.memoria_global.espacios[alcance][tipo][indice]
             if ret == None:
+                print(self.memoria_global.espacios[alcance])
                 raise Exception("Casilla de memoria {} no encontrada".format(dir))
             return ret
         elif alcance == 'ctes':

@@ -252,7 +252,7 @@ def p_p12(t):
 
 def p_ciclo_p(t):
     '''
-    ciclo_p : POR '(' ID EN CTE_ENT ')' p25 '{' bloque '}'
+    ciclo_p : POR '(' ID EN hiper_exp ')' p25 '{' bloque '}'
     '''
     fin_ciclo = pila_saltos.pop()
     retorno = pila_saltos.pop()
@@ -266,9 +266,12 @@ def p_p25(t):
     '''
     p25 : nulo
     '''
+    limite = pila_o.pop()
+    limite_t = pila_tipos.pop()
+    if limite_t != 'ent':
+        raise Exception("Solo se pueden usar limites enteros para el ciclo POR")
     contador = dir_funciones.insertar_variable(pila_func[-1], 'ent', t[-4])
     cero = dir_funciones.insertar_constante('ent', 0)
-    limite = dir_funciones.insertar_constante('ent', t[-2])
     cuadruplos.append(['=', cero, -1, contador])
     pila_saltos.append(len(cuadruplos))
     chequeo = dir_funciones.insertar_variable(pila_func[-1], 'bool')
@@ -450,10 +453,10 @@ def p_factor(t):
 
 def p_conversion(t):
     '''
-    conversion : tipo '(' hiper_exp ')'
+    conversion : tipo '(' p14 hiper_exp ')' p17
     '''
     valor = pila_o.pop()
-    pila_tipos.pop()
+    print(valor, t[1], pila_tipos.pop())
     temp = dir_funciones.insertar_variable(pila_func[-1], t[1])
     cuadruplos.append([t[1], valor, -1, temp])
     pila_o.append(temp)
@@ -476,16 +479,16 @@ def p_func_esp(t):
 
 def p_func_esp_1(t):
     '''
-    func_esp_1 : SEN '(' hiper_exp ')' p18
-               | COS '(' hiper_exp ')' p18
-               | TAN '(' hiper_exp ')' p18
-               | SENH '(' hiper_exp ')' p18
-               | COSH '(' hiper_exp ')' p18
-               | TANH '(' hiper_exp ')' p18
-               | LOG '(' hiper_exp ')' p18
-               | ABS '(' hiper_exp ')' p18
-               | PISO '(' hiper_exp ')' p18
-               | TECHO '(' hiper_exp ')' p18
+    func_esp_1 : SEN '(' p14 hiper_exp ')' p17 p18
+               | COS '(' p14 hiper_exp ')' p17 p18
+               | TAN '(' p14 hiper_exp ')' p17 p18
+               | SENH '(' p14 hiper_exp ')' p17 p18
+               | COSH '(' p14 hiper_exp ')' p17 p18
+               | TANH '(' p14 hiper_exp ')' p17 p18
+               | LOG '(' p14 hiper_exp ')' p17 p18
+               | ABS '(' p14 hiper_exp ')' p17 p18
+               | PISO '(' p14 hiper_exp ')' p17 p18
+               | TECHO '(' p14 hiper_exp ')' p17 p18
                | MEDIA '(' ID ')' p26
                | MODA '(' ID ')' p26
                | MEDIANA '(' ID ')' p26
@@ -499,7 +502,7 @@ def p_p18(t):
     val = pila_o.pop()
     val_t = pila_tipos.pop()
     if val_t not in ['ent', 'flot']:
-        raise Exception("Funcion {}() espera un argumento entero o flotante".format(t[-4]))
+        raise Exception("Funcion {}() espera un argumento entero o flotante".format(t[-6]))
     if t[-4] == 'abs':
         temp_t = val_t
     elif t[-4] in ['piso', 'techo']:
@@ -507,7 +510,7 @@ def p_p18(t):
     else:
         temp_t = 'flot'
     temp = dir_funciones.insertar_variable(pila_func[-1], temp_t)
-    cuadruplos.append([t[-4], val, -1, temp])
+    cuadruplos.append([t[-6], val, -1, temp])
     pila_o.append(temp)
     pila_tipos.append(temp_t)
 
@@ -535,10 +538,10 @@ def p_p26(t):
 
 def p_func_esp_2(t):
     '''
-    func_esp_2 : ALEATORIO '(' hiper_exp ',' hiper_exp ')' p19
-               | PODER '(' hiper_exp ',' hiper_exp ')' p19
-               | MIN '(' hiper_exp ',' hiper_exp ')' p20
-               | MAX '(' hiper_exp ',' hiper_exp ')' p20
+    func_esp_2 : ALEATORIO '(' p14 hiper_exp p17 ',' p14 hiper_exp ')' p17 p19
+               | PODER '(' p14 hiper_exp p17 ',' p14 hiper_exp ')' p17 p19
+               | MIN '(' p14 hiper_exp p17 ',' p14 hiper_exp ')' p17 p20
+               | MAX '(' p14 hiper_exp p17 ',' p14 hiper_exp ')' p17 p20
     '''
 
 def p_p19(t):
@@ -550,9 +553,9 @@ def p_p19(t):
     op1_t = pila_tipos.pop()
     op2_t = pila_tipos.pop()
     if op1_t != 'ent' or op2_t != 'ent':
-        raise Exception("Funcion {}() espera dos argumentos de tipo entero".format(t[-6]))
+        raise Exception("Funcion {}() espera dos argumentos de tipo entero".format(t[-10]))
     temp = dir_funciones.insertar_variable(pila_func[-1], op1_t)
-    cuadruplos.append([t[-6], op2, op1, temp])
+    cuadruplos.append([t[-10], op2, op1, temp])
     pila_o.append(temp)
     pila_tipos.append(op1_t)
 
@@ -565,9 +568,9 @@ def p_p20(t):
     op1_t = pila_tipos.pop()
     op2_t = pila_tipos.pop()
     if op2_t != op1_t:
-        raise Exception("Funcion {}() espera dos argumentos de tipo entero o dos de tipo flotante".format(t[-6]))
+        raise Exception("Funcion {}() espera dos argumentos de tipo entero o dos de tipo flotante".format(t[-8]))
     temp = dir_funciones.insertar_variable(pila_func[-1], op1_t)
-    cuadruplos.append([t[-6], op2, op1, temp])
+    cuadruplos.append([t[-8], op2, op1, temp])
     pila_o.append(temp)
     pila_tipos.append(op1_t)
 

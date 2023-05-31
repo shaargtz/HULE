@@ -56,16 +56,16 @@ tokens = tokens + list(reserved.values())
 t_IGUAL_QUE = r'=='
 t_DIFERENTE_QUE = r'!='
 
-t_CTE_ENT = r'[0-9]+'
-t_CTE_FLOT = r'[0-9]+\.[0-9]+'
+t_CTE_ENT = r'-?[0-9]+'
+t_CTE_FLOT = r'-?[0-9]+\.[0-9]+'
 
 def t_CTE_CAR(t):
-    r'\'.\''
+    r'\'[^\']\''
     t.value = t.value[1:-1]
     return t
 
 def t_CTE_CADENA(t):
-    r'\'.{2,}\''
+    r'\'[^\']{2,}\''
     t.value = t.value[1:-1]
     return t
 

@@ -1,19 +1,4 @@
 codigo_1 = '''
-func ent fact(ent a) {
-    si (a == 1 | a == 0) {
-        regresa 1;
-    } sino {
-        regresa a * fact(a - 1);
-    }
-};
-hule() 
-{
-    imprime(fact(10));
-    imprime(3 - (4 * (5 - 2)));
-}
-'''
-
-codigo_2 = '''
 var ent a, b;
 func vacia imprime_x_veces(cadena w, ent veces) {
     var ent cont;
@@ -54,7 +39,7 @@ hule()
 }
 '''
 
-codigo_3 = '''
+codigo_2 = '''
 hule() 
 {
     var ent A[5], cont, b, c;
@@ -74,12 +59,10 @@ hule()
         imprime(A[cont]);
         cont = cont + 1;
     }
-
-    
 }
 '''
 
-codigo_4 = '''
+codigo_3 = '''
 hule() 
 {
     var ent A[2][3], i, j;
@@ -112,7 +95,7 @@ hule()
 }
 '''
 
-codigo_5 = '''
+codigo_4 = '''
 hule() 
 {
     var ent A[2][3][4], i, j, k;
@@ -160,7 +143,7 @@ hule()
 }
 '''
 
-codigo_6 = '''
+codigo_5 = '''
 hule() {
     var ent A[5];
     por(i en 5) {
@@ -173,7 +156,7 @@ hule() {
 }
 '''
 
-codigo_7 = '''
+codigo_6 = '''
 hule() {
     var ent A[5];
     var flot B[5];
@@ -255,5 +238,200 @@ hule() {
     por(i en 5) {
         imprime(a + i);
     }
+}
+'''
+
+fib_rec = '''
+func ent fib(ent a) {
+    si (a == 1 | a == 2) {
+        regresa 1;
+    } sino {
+        regresa fib(a - 1) + fib(a - 2);
+    }
+};
+
+hule() {
+    imprime(fib(10));
+}
+'''
+
+fib_iter = '''
+func ent fib(ent a) {
+    si (a == 1 | a == 2) {
+        regresa 1;
+    }
+    var ent A[2], acum;
+    acum = 0;
+    A[0] = 1;
+    A[1] = 1;
+    por(i en a) {
+        si (i > 1) {
+            acum = A[0] + A[1];
+            A[0] = A[1];
+            A[1] = acum;
+        }
+    }
+    regresa A[1];
+};
+
+hule() {
+    imprime(fib(10));
+}
+'''
+
+fact_rec = '''
+func ent fact(ent a) {
+    si (a == 1 | a == 0) {
+        regresa 1;
+    } sino {
+        regresa a * fact(a - 1);
+    }
+};
+hule() 
+{
+    imprime(fact(10));
+}
+'''
+
+fact_iter = '''
+func ent fact(ent a) {
+    var ent acum;
+    acum = 1;
+    por (i en a) {
+        acum = acum * (i + 1);
+    }
+    regresa acum;
+};
+hule() 
+{
+    imprime(fact(10));
+}
+'''
+
+sort = '''
+hule() {
+    var ent arreglo[10], aux;
+    por (a en largo(arreglo)) {
+        arreglo[a] = aleatorio(1, 10);
+        imprime(arreglo[a]);
+    }
+    imprime('sorteado:');
+    por (i en largo(arreglo) - 1) {
+        por (j en largo(arreglo) - i + 1) {
+            si (arreglo[j] > arreglo[j + 1]) {
+                aux = arreglo[j + 1];
+                arreglo[j + 1] = arreglo[j];
+                arreglo[j] = aux;
+            }
+        }
+    }
+    por (b en largo(arreglo)) {
+        imprime(arreglo[b]);
+    }
+}
+'''
+
+find = '''
+hule() {
+    var ent arreglo[10], aux, busqueda, indice;
+    por (a en largo(arreglo)) {
+        arreglo[a] = aleatorio(1, 10);
+        imprime(arreglo[a]);
+    }
+    indice = -1;
+    imprime('valor a buscar:');
+    busqueda = ent(lee());
+    por (i en largo(arreglo)) {
+        si (arreglo[largo(arreglo) - (i + 1)] == busqueda) {
+            indice = largo(arreglo) - (i + 1);
+        }
+    }
+    imprime('--------');
+    si (indice == -1) {
+        imprime('no se encontro el valor');
+    } sino {
+        imprime(indice);
+    }
+}
+'''
+
+matrix_mult = '''
+hule() {
+    var ent A[3][3], B[3][3], res[3][3];
+    var cadena a, b, c;
+    imprime('MATRIZ A');
+    por (x1 en 3) {
+        a = '| ';
+        por (y1 en 3) {
+            A[x1][y1] = aleatorio(1, 10);
+            a = a + cadena(A[x1][y1]) + ' ';
+        }
+        imprime(a);
+    }
+    imprime('MATRIZ B');
+    por (x2 en 3) {
+        b = '| ';
+        por (y2 en 3) {
+            B[x2][y2] = aleatorio(1, 10);
+            b = b + cadena(B[x2][y2]) + ' ';
+        }
+        imprime(b);
+    }
+    imprime('MATRIZ AxB');
+    por (i en 3) {
+        c = '| ';
+        por (j en 3) {
+            res[i][j] = 0;
+            por (k en 3) {
+                res[i][j] = res[i][j] + A[i][k] * B[k][j];
+            }
+            c = c + cadena(res[i][j]) + ' ';
+        }
+        imprime(c);
+    }
+}
+'''
+
+grafica_edades = '''
+hule() {
+    var ent frecuencias[5];
+    var cadena edades[5];
+    por (i en largo(frecuencias)) {
+        frecuencias[i] = aleatorio(5, 10);
+    }
+    por (j en largo(edades)) {
+        edades[j] = cadena(j + 18) + ' años';
+    }
+    graficar(frecuencias, edades);
+}
+'''
+
+calculos_estadisticos = '''
+hule() {
+    var cadena c;
+    c = 'estaturas: ';
+    var ent estaturas[10];
+    por (i en largo(estaturas)) {
+        estaturas[i] = aleatorio(160, 200);
+        c = c + cadena(estaturas[i]) + ', ';
+    }
+    imprime(c);
+    imprime('media: ' + cadena(media(estaturas)));
+    imprime('moda: ' + cadena(moda(estaturas)));
+    imprime('mediana: ' + cadena(mediana(estaturas)));
+}
+'''
+
+calculos_aritmeticos = '''
+hule() {
+    var cadena a, b;
+    imprime('a:');
+    a = lee();
+    imprime('b:');
+    b = lee();
+
+    imprime(a + ' ^ ' + b + ' = ' + cadena(poder(ent(a), ent(b))));
+    imprime('log ' + b + ' = ' + cadena(log(ent(b))));
+    imprime('abs(' + a + ') = ' + cadena(abs(ent(a))));
 }
 '''
