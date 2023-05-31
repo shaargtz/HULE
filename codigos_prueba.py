@@ -245,3 +245,15 @@ hule() {
     }
 }
 '''
+
+codigo_10 = '''
+hule() {
+    var ent a;
+    imprime('numero:');
+    a = ent(lee());
+    imprime('-------');
+    por(i en 5) {
+        imprime(a + i);
+    }
+}
+'''

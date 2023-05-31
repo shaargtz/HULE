@@ -200,6 +200,35 @@ class MaquinaVirtual:
                 # print("ENDFUNC")
                 self.memoria.dormir_memoria()
                 self.pila_apuntador.pop()
+            elif operador == 'LEE':
+                # print("LEE")
+                aux = input()
+                self.memoria.asignar_casilla(destino, aux)
+            elif operador == 'ent':
+                # print("ent({})".format(operando_1))
+                valor = self.memoria.buscar_casilla(operando_1)
+                conversion = int(valor)
+                self.memoria.asignar_casilla(destino, conversion)
+            elif operador == 'flot':
+                # print("flot({})".format(operando_1))
+                valor = self.memoria.buscar_casilla(operando_1)
+                conversion = float(valor)
+                self.memoria.asignar_casilla(destino, conversion)
+            elif operador == 'car':
+                # print("car({})".format(operando_1))
+                valor = self.memoria.buscar_casilla(operando_1)
+                conversion = chr(valor)
+                self.memoria.asignar_casilla(destino, conversion)
+            elif operador == 'cadena':
+                # print("cadena({})".format(operando_1))
+                valor = self.memoria.buscar_casilla(operando_1)
+                conversion = str(valor)
+                self.memoria.asignar_casilla(destino, conversion)
+            elif operador == 'bool':
+                # print("bool({})".format(operando_1))
+                valor = self.memoria.buscar_casilla(operando_1)
+                conversion = bool(valor)
+                self.memoria.asignar_casilla(destino, conversion)
             elif operador == 'ENDPROG':
                 # print("ENDFUNC")
                 pass

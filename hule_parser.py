@@ -3,8 +3,6 @@ from hule_lexer import tokens
 from directorio_funciones import DirFunciones
 from cubo_semantico import CuboSemantico
 from utilidad import *
-from maquina_virtual import MaquinaVirtual
-from codigos_prueba import *
 
 dir_funciones = DirFunciones()
 cubo_semantico = CuboSemantico()
@@ -446,7 +444,29 @@ def p_factor(t):
            | cte
            | var
            | sub_exp
+           | lee
+           | conversion
     '''
+
+def p_conversion(t):
+    '''
+    conversion : tipo '(' hiper_exp ')'
+    '''
+    valor = pila_o.pop()
+    pila_tipos.pop()
+    temp = dir_funciones.insertar_variable(pila_func[-1], t[1])
+    cuadruplos.append([t[1], valor, -1, temp])
+    pila_o.append(temp)
+    pila_tipos.append(t[1])
+
+def p_lee(t):
+    '''
+    lee : LEE '(' ')'
+    '''
+    temp = dir_funciones.insertar_variable(pila_func[-1], 'cadena')
+    cuadruplos.append(['LEE', -1, -1, temp])
+    pila_o.append(temp)
+    pila_tipos.append('cadena')
 
 def p_func_esp(t):
     '''
@@ -749,14 +769,3 @@ def p_error(t):
     raise Exception("Error en linea " + str(t.lineno))
 
 parser = yacc.yacc()
-
-parser.parse(codigo_9)
-
-imprimir_cuadruplos(cuadruplos)
-imprimir_tabla_variables(dir_funciones)
-
-mv = MaquinaVirtual(cuadruplos, dir_funciones)
-print('+-------------------EJECUCION-------------------+')
-mv.ejecutar()
-print('+-----------------------------------------------+')
-mv.imprimir_memoria()

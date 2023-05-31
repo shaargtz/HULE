@@ -27,6 +27,7 @@ reserved = {
     'mientras' : 'MIENTRAS',
     'regresa' : 'REGRESA',
     'imprime' : 'IMPRIME',
+    'lee' : 'LEE',
     'sen' : 'SEN',
     'cos' : 'COS',
     'tan' : 'TAN',
@@ -57,8 +58,16 @@ t_DIFERENTE_QUE = r'!='
 
 t_CTE_ENT = r'[0-9]+'
 t_CTE_FLOT = r'[0-9]+\.[0-9]+'
-t_CTE_CAR = r'\'.\''
-t_CTE_CADENA = r'\'.{2,}\''
+
+def t_CTE_CAR(t):
+    r'\'.\''
+    t.value = t.value[1:-1]
+    return t
+
+def t_CTE_CADENA(t):
+    r'\'.{2,}\''
+    t.value = t.value[1:-1]
+    return t
 
 t_ignore = ' \t'
 
