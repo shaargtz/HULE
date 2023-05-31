@@ -1,0 +1,6 @@
+hule() {
+    var ent A[1001];
+    por (i en 1001) {
+        A[i] = i;
+    }
+}

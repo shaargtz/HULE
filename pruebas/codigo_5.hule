@@ -1,0 +1,10 @@
+hule() {
+    var ent A[5];
+    por(i en 5) {
+        A[i] = i * i;
+    }
+
+    por(j en 5) {
+        imprime(A[4 - j]);
+    }
+}

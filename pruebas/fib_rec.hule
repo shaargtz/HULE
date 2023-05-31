@@ -1,0 +1,11 @@
+func ent fib(ent a) {
+    si (a == 1 | a == 2) {
+        regresa 1;
+    } sino {
+        regresa fib(a - 1) + fib(a - 2);
+    }
+};
+
+hule() {
+    imprime(fib(10));
+}

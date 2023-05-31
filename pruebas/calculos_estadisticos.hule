@@ -1,0 +1,13 @@
+hule() {
+    var cadena c;
+    c = 'estaturas: ';
+    var ent estaturas[10];
+    por (i en largo(estaturas)) {
+        estaturas[i] = aleatorio(160, 200);
+        c = c + cadena(estaturas[i]) + ', ';
+    }
+    imprime(c);
+    imprime('media: ' + cadena(media(estaturas)));
+    imprime('moda: ' + cadena(moda(estaturas)));
+    imprime('mediana: ' + cadena(mediana(estaturas)));
+}

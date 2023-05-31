@@ -1,0 +1,7 @@
+func vacia f(ent a) {
+    imprime(a);
+    f(a + 1);
+};
+hule() {
+    f(1);
+}

@@ -1,0 +1,12 @@
+func ent fact(ent a) {
+    var ent acum;
+    acum = 1;
+    por (i en a) {
+        acum = acum * (i + 1);
+    }
+    regresa acum;
+};
+hule() 
+{
+    imprime(fact(10));
+}

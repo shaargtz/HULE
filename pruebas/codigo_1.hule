@@ -1,0 +1,38 @@
+var ent a, b;
+func vacia imprime_x_veces(cadena w, ent veces) {
+    var ent cont;
+    cont = 0;
+    mientras (cont < veces) {
+        imprime(w);
+        cont = cont + 1;
+    }
+};
+func ent exponente(ent base, ent exp) {
+    var ent res;
+    res = 1;
+    mientras (exp > 0) {
+        res = res * base;
+        exp = exp - 1;
+    }
+    regresa res;
+};
+hule() 
+{
+    var ent c;
+    a = 3;
+    b = 4;
+    c = a + b;
+    mientras (c > b){
+        b = b + 1;
+        a = a * 2;
+    }
+    si (a / 3 > 10) {
+        imprime('aaa');
+    } sino {
+        imprime('bbb');
+    }
+    imprime(c);
+    imprime(a);
+    imprime_x_veces('hola', 5);
+    imprime(exponente(3, exponente(2, 3)));
+}

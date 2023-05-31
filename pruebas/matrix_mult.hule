@@ -1,0 +1,34 @@
+hule() {
+    var ent A[3][3], B[3][3], res[3][3];
+    var cadena a, b, c;
+    imprime('MATRIZ A');
+    por (x1 en 3) {
+        a = '| ';
+        por (y1 en 3) {
+            A[x1][y1] = aleatorio(1, 10);
+            a = a + cadena(A[x1][y1]) + ' ';
+        }
+        imprime(a);
+    }
+    imprime('MATRIZ B');
+    por (x2 en 3) {
+        b = '| ';
+        por (y2 en 3) {
+            B[x2][y2] = aleatorio(1, 10);
+            b = b + cadena(B[x2][y2]) + ' ';
+        }
+        imprime(b);
+    }
+    imprime('MATRIZ AxB');
+    por (i en 3) {
+        c = '| ';
+        por (j en 3) {
+            res[i][j] = 0;
+            por (k en 3) {
+                res[i][j] = res[i][j] + A[i][k] * B[k][j];
+            }
+            c = c + cadena(res[i][j]) + ' ';
+        }
+        imprime(c);
+    }
+}

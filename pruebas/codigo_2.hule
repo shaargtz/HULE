@@ -1,0 +1,20 @@
+hule() 
+{
+    var ent A[5], cont, b, c;
+    b = 3;
+    A[0] = 13;
+    A[1] = 6;
+    A[2] = 9;
+    A[3] = 2;
+    A[4] = A[b * A[3] - 4];
+
+    c = A[0] + A[1] + A[2] + A[3] + A[4];
+    imprime(c);
+
+    cont = 0;
+
+    mientras(cont < 5) {
+        imprime(A[cont]);
+        cont = cont + 1;
+    }
+}

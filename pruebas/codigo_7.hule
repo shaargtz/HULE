@@ -1,0 +1,15 @@
+hule() {
+    var ent A[5];
+    por(i en 5) {
+        A[i] = aleatorio(1, 5);
+    }
+
+    var cadena B[5];
+    B[0] = 'aaa';
+    B[1] = 'bbb';
+    B[2] = 'ccc';
+    B[3] = 'ddd';
+    B[4] = 'eee';
+
+    graficar(A, B);
+}

@@ -1,0 +1,11 @@
+hule() {
+    var ent frecuencias[5];
+    var cadena edades[5];
+    por (i en largo(frecuencias)) {
+        frecuencias[i] = aleatorio(5, 10);
+    }
+    por (j en largo(edades)) {
+        edades[j] = cadena(j + 18) + ' años';
+    }
+    graficar(frecuencias, edades);
+}

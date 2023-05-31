@@ -1,0 +1,11 @@
+hule() {
+    var cadena a, b;
+    imprime('a:');
+    a = lee();
+    imprime('b:');
+    b = lee();
+
+    imprime(a + ' ^ ' + b + ' = ' + cadena(poder(ent(a), ent(b))));
+    imprime('log ' + b + ' = ' + cadena(log(ent(b))));
+    imprime('abs(' + a + ') = ' + cadena(abs(ent(a))));
+}

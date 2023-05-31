@@ -1,0 +1,11 @@
+func ent fact(ent a) {
+    si (a == 1 | a == 0) {
+        regresa 1;
+    } sino {
+        regresa a * fact(a - 1);
+    }
+};
+hule() 
+{
+    imprime(fact(10));
+}

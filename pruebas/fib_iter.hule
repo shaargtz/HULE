@@ -1,0 +1,21 @@
+func ent fib(ent a) {
+    si (a == 1 | a == 2) {
+        regresa 1;
+    }
+    var ent A[2], acum;
+    acum = 0;
+    A[0] = 1;
+    A[1] = 1;
+    por(i en a) {
+        si (i > 1) {
+            acum = A[0] + A[1];
+            A[0] = A[1];
+            A[1] = acum;
+        }
+    }
+    regresa A[1];
+};
+
+hule() {
+    imprime(fib(10));
+}

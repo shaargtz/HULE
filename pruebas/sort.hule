@@ -1,0 +1,20 @@
+hule() {
+    var ent arreglo[10], aux;
+    por (a en largo(arreglo)) {
+        arreglo[a] = aleatorio(1, 10);
+        imprime(arreglo[a]);
+    }
+    imprime('sorteado:');
+    por (i en largo(arreglo) - 1) {
+        por (j en largo(arreglo) - i + 1) {
+            si (arreglo[j] > arreglo[j + 1]) {
+                aux = arreglo[j + 1];
+                arreglo[j + 1] = arreglo[j];
+                arreglo[j] = aux;
+            }
+        }
+    }
+    por (b en largo(arreglo)) {
+        imprime(arreglo[b]);
+    }
+}

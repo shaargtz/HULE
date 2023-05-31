@@ -1,0 +1,21 @@
+hule() {
+    var ent arreglo[10], aux, busqueda, indice;
+    por (a en largo(arreglo)) {
+        arreglo[a] = aleatorio(1, 10);
+        imprime(arreglo[a]);
+    }
+    indice = -1;
+    imprime('valor a buscar:');
+    busqueda = ent(lee());
+    por (i en largo(arreglo)) {
+        si (arreglo[largo(arreglo) - (i + 1)] == busqueda) {
+            indice = largo(arreglo) - (i + 1);
+        }
+    }
+    imprime('--------');
+    si (indice == -1) {
+        imprime('no se encontro el valor');
+    } sino {
+        imprime(indice);
+    }
+}
