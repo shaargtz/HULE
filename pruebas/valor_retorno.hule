@@ -1,0 +1,9 @@
+func ent f() {
+    var flot x;
+    x = 5.2;
+    regresa x;
+};
+
+hule() {
+    f();
+}

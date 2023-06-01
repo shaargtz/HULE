@@ -323,8 +323,10 @@ def p_retorno(t):
     retorno : REGRESA hiper_exp ';'
     '''
     val = pila_o.pop()
-    pila_tipos.pop()
+    val_t = pila_tipos.pop()
     retorno = dir_funciones.buscar_variable(pila_func[-1], '_' + pila_func[-1])
+    if val_t != checar_tipo_memoria(retorno):
+        raise Exception("El valor de retorno no es del mismo tipo que el retorno de la funcion")
     cuadruplos.append(['REGRESA', val, -1, retorno])
 
 def p_imprimir(t):
