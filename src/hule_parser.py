@@ -205,7 +205,7 @@ def p_p27(t):
     if checar_tipo_memoria(dir_etiq) not in ['car', 'cadena']:
         raise Exception("Funcion graficar() espera que el segundo arreglo sea de tipo caracter o cadena")
     if len(dims_val) < 1 or len(dims_etiq) < 1:
-        raise Exception("Funcion graficar() espera dos argumento tipo arreglo y encontro una variable")
+        raise Exception("Funcion graficar() espera dos argumentos tipo arreglo y encontro una variable")
     elif len(dims_val) > 1 or len(dims_etiq) > 1:
         raise Exception("Funcion graficar() espera dos arreglos de una dimension y encontro uno de {}".format(max(len(dims_val), len(dims_etiq))))
     elif dims_val[0] != dims_etiq[0]:
