@@ -203,7 +203,7 @@ def p_p27(t):
     dir_etiq = dir_funciones.buscar_variable(pila_func[-1], t[-3])
     dims_etiq = dir_funciones.buscar_dimensiones(pila_func[-1], t[-3])
     if checar_tipo_memoria(dir_etiq) not in ['car', 'cadena']:
-        raise Exception("Funcion graficar() que el segundo arreglo sea de tipo caracter o cadena")
+        raise Exception("Funcion graficar() espera que el segundo arreglo sea de tipo caracter o cadena")
     if len(dims_val) < 1 or len(dims_etiq) < 1:
         raise Exception("Funcion graficar() espera dos argumento tipo arreglo y encontro una variable")
     elif len(dims_val) > 1 or len(dims_etiq) > 1:
