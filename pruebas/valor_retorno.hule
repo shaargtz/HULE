@@ -5,5 +5,5 @@ func ent f() {
 };
 
 hule() {
-    f();
+    imprime(f());
 }

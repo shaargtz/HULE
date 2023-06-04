@@ -7,5 +7,6 @@ func ent fact(ent a) {
 };
 hule() 
 {
-    imprime(fact(10));
+    imprime('Factorial: ');
+    imprime(fact(ent(lee())));
 }

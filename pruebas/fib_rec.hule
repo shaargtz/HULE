@@ -7,5 +7,6 @@ func ent fib(ent a) {
 };
 
 hule() {
-    imprime(fib(10));
+    imprime('Fibonacci: ');
+    imprime(fib(ent(lee())));
 }
