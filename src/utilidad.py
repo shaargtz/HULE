@@ -40,3 +40,10 @@ def imprimir_tabla_variables(dir_funciones):
                                             dir_funciones.directorio[f][1].tabla[a][v][0], 
                                             dir_funciones.directorio[f][1].tabla[a][v][1]])
     print(tabla_variables)
+
+def imprimir_dir_func(dir_funciones):
+    tabla_dir = PrettyTable(['nombre', 'tipo', 'parametros', 'cuadruplo', 'return'])
+    for c in dir_funciones.directorio:
+        tabla_dir.add_row([c] + [dir_funciones.directorio[c][0]] + [dir_funciones.directorio[c][2]] 
+                              + [dir_funciones.directorio[c][3]] + [dir_funciones.directorio[c][4]])
+    print(tabla_dir)

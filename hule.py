@@ -17,11 +17,12 @@ parser.parse(codigo)
 
 if debug == 's':
     imprimir_cuadruplos(cuadruplos)
+    imprimir_dir_func(dir_funciones)
     imprimir_tabla_variables(dir_funciones)
 
 mv = MaquinaVirtual(cuadruplos, dir_funciones)
+if debug == 's':
+    mv.imprimir_memoria()
 print('+-------------------EJECUCION-------------------+')
 mv.ejecutar()
 print('+-----------------------------------------------+')
-if debug == 's':
-    mv.imprimir_memoria()
