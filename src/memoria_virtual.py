@@ -36,10 +36,13 @@ class VonNeumann:
         # 18 [ 18000 -> 18999 : car ]
         # 19 [ 19000 -> 19999 : cadena ]
 
+        # pila de ejecucion de funciones
         self.pila_funciones = []
+        # memoria que esta siendo instanciada
         self.nueva_memoria = []
         self.memoria_global = EspaciosMemoria()
         self.memoria_ctes = EspaciosMemoria()
+        # espacios totales que no deben pasar el limite estipulado
         self.total_apilado = 0
 
     def instanciar(self, alcance, contadores):
@@ -51,10 +54,12 @@ class VonNeumann:
         elif alcance == 'ctes':
             self.memoria_ctes.instanciar(contadores)
 
+    # creamos una nueva memoria
     def era(self, contadores):
         self.nueva_memoria.append(EspaciosMemoria())
         self.nueva_memoria[-1].instanciar(contadores)
     
+    # le damos un parametro a la memoria que se esta creando
     def param(self, dir1, dir2):
         val = self.buscar_casilla(dir1)
         self.asignar_param(dir2, val)
@@ -65,10 +70,12 @@ class VonNeumann:
         if self.total_apilado > 11000:
             raise Exception("Limite de memoria en la pila excedido")
 
+    # despues de una funcion liberamos la memoria
     def dormir_memoria(self):
         self.total_apilado -= len(self.pila_funciones[-1].espacios)
         self.pila_funciones.pop()
 
+    # principal metodo para accesar a la memoria en ejecucion
     def buscar_casilla(self, dir):
         alcance = checar_alcance_memoria(dir)
         tipo = checar_tipo_memoria(dir)
@@ -89,6 +96,7 @@ class VonNeumann:
                 raise Exception("Casilla de memoria {} no encontrada".format(dir))
             return ret
 
+    # principal metodo usado para el manejo de memoria en ejecucion
     def asignar_casilla(self, dir, val):
         alcance = checar_alcance_memoria(dir)
         tipo = checar_tipo_memoria(dir)
@@ -100,6 +108,7 @@ class VonNeumann:
         elif alcance == 'ctes':
             self.memoria_ctes.espacios[alcance][tipo][indice] = val
 
+    # pasamos el valor del parametro entre memoria y memoria
     def asignar_param(self, dir, val):
         alcance = checar_alcance_memoria(dir)
         tipo = checar_tipo_memoria(dir)

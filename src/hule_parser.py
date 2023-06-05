@@ -7,26 +7,39 @@ from src.utilidad import *
 dir_funciones = DirFunciones()
 cubo_semantico = CuboSemantico()
 
+# guardara los operandos que se lean de variables, constantes, llamadas, etc
 pila_o = []
+
+# guardara los operadores que aparezcan en las expresiones, asi como +, -, &, etc.
 pil_oper = []
+
+# guardara las direcciones y los cuadruplos en los que se tengan que rellenar los saltos
+# GOTO, GOTOF, GOTOV, etc.
 pila_saltos = []
+
+# pila complementaria a pila_o, la cual tiene el tipo de cada operando
 pila_tipos = []
+
+# pila para llevar el control sobre el modulo en el que se esta trabajando
 pila_func = []
+
+# pila para manejar funciones que llamen a otras funciones
 pila_llam = []
 
+# lista de operaciones que la maquina virtual debera realizar
 cuadruplos = []
 
 def p_programa(t):
     '''
     programa : p1 dec HULE p2 '(' ')' '{' bloque '}'
     '''
-    # todo: borrar todo en memoria al final
     cuadruplos.append(['ENDPROG', -1, -1, -1])
 
 def p_p1(t):
     '''
     p1 : nulo
     '''
+    # GOTO main
     cuadruplos.append(['GOTO', -1, -1, None])
     dir_funciones.insertar_funcion('global', 'vacia')
     pila_func.append('global')
@@ -35,6 +48,7 @@ def p_p2(t):
     '''
     p2 : nulo
     '''
+    # rellena el GOTO main
     cuadruplos[0][3] = len(cuadruplos)
     pila_func.append('hule')
     cuadruplos.append(['INSTANCIAR', -1, -1, -1])
@@ -124,6 +138,7 @@ def p_p6(t):
     if t[-2] != 'vacia':
         if not dir_funciones.tiene_tabla_var('global'):
             dir_funciones.insertar_tabla_var('global', 'global')
+        # se agrega la variable global de retorno
         ret = dir_funciones.insertar_variable('global', t[-2], '_' + t[-1])
         dir_funciones.insertar_retorno(pila_func[-1], ret)
 
@@ -131,6 +146,7 @@ def p_p16(t):
     '''
     p16 : nulo
     '''
+    # rellenar salto
     dir_funciones.directorio[pila_func[-1]][3] = len(cuadruplos)
     
 def p_super_tipo(t):
@@ -228,6 +244,7 @@ def p_ciclo_m(t):
     '''
     ciclo_m : MIENTRAS p11 '(' hiper_exp ')' p12 '{' bloque '}'
     '''
+    # rellenar saltos
     fin_ciclo = pila_saltos.pop()
     retorno = pila_saltos.pop()
     cuadruplos.append(['GOTO', -1, -1, retorno])
@@ -258,8 +275,10 @@ def p_ciclo_p(t):
     retorno = pila_saltos.pop()
     contador = pila_o.pop()
     uno = dir_funciones.insertar_constante('ent', 1)
+    # incrementar contador
     cuadruplos.append(['+', contador, uno, contador])
     cuadruplos.append(['GOTO', -1, -1, retorno])
+    # rellenar salto
     cuadruplos[fin_ciclo][3] = len(cuadruplos)
     
 def p_p25(t):
@@ -272,6 +291,7 @@ def p_p25(t):
         raise Exception("Solo se pueden usar limites enteros para el ciclo POR")
     contador = dir_funciones.insertar_variable(pila_func[-1], 'ent', t[-4])
     cero = dir_funciones.insertar_constante('ent', 0)
+    # chequeo de contador
     cuadruplos.append(['=', cero, -1, contador])
     pila_saltos.append(len(cuadruplos))
     chequeo = dir_funciones.insertar_variable(pila_func[-1], 'bool')
@@ -284,6 +304,7 @@ def p_cond(t):
     '''
     cond : SI '(' hiper_exp ')' p9 '{' bloque '}' sino
     '''
+    # rellenar saltos
     fin_cond = pila_saltos.pop()
     cuadruplos[fin_cond][3] = len(cuadruplos)
 
@@ -308,6 +329,7 @@ def p_p10(t):
     '''
     p10 : nulo
     '''
+    # rellenar saltos
     cuadruplos.append(['GOTO', -1, -1, None])
     falso = pila_saltos.pop()
     pila_saltos.append(len(cuadruplos) - 1)
@@ -324,6 +346,7 @@ def p_retorno(t):
     '''
     val = pila_o.pop()
     val_t = pila_tipos.pop()
+    # variable global de retorno
     retorno = dir_funciones.buscar_variable(pila_func[-1], '_' + pila_func[-1])
     if val_t != checar_tipo_memoria(retorno):
         raise Exception("El valor de retorno no es del mismo tipo que el retorno de la funcion")
@@ -496,6 +519,7 @@ def p_func_esp_1(t):
                | MEDIANA '(' ID ')' p26
                | LARGO '(' ID ')' p26
     '''
+    # funciones especiales con un argumento
 
 def p_p18(t):
     '''
@@ -545,6 +569,7 @@ def p_func_esp_2(t):
                | MIN '(' p14 hiper_exp p17 ',' p14 hiper_exp ')' p17 p20
                | MAX '(' p14 hiper_exp p17 ',' p14 hiper_exp ')' p17 p20
     '''
+    # funciones especiales con 2 argumentos
 
 def p_p19(t):
     '''
@@ -580,11 +605,13 @@ def p_sub_exp(t):
     '''
     sub_exp : '(' p14 hiper_exp ')' p17
     '''
+    # fondo falso para respetar el orden de operaciones
 
 def p_llama_func_exp(t):
     '''
     llama_func_exp : ID p15 '(' p14 arg ')' p17
     '''
+    # checa el numero de argumentos
     if pila_llam[-1][1][0] < pila_llam[-1][1][1]:
         raise Exception("Funcion " + t[1] + " fue llamada con menos argumentos de los requeridos")
     cuadruplos.append(['GOSUB', -1, -1, dir_funciones.buscar_cuadruplo(t[1])])
@@ -593,6 +620,7 @@ def p_llama_func_exp(t):
         retorno_glob = dir_funciones.buscar_variable(pila_llam[-1][0], '_' + t[1])
         pila_llam.pop()
         retorno_temp = dir_funciones.insertar_variable(pila_llam[-1][0], tipo_retorno)
+        # asigna lo de la variable de retorno a una temporal para poder volver a llamar la funcion
         cuadruplos.append(['=', retorno_glob, -1, retorno_temp])
         pila_o.append(retorno_temp)
         pila_tipos.append(checar_tipo_memoria(retorno_temp))
@@ -627,12 +655,15 @@ def p_p13(t):
     '''
     p13 : nulo
     '''
+    # checa el numero de argumentos
     if pila_llam[-1][1][0] == pila_llam[-1][1][1]:
         raise Exception("Funcion " + pila_llam[-1][1] + " fue llamada con mas argumentos de los requeridos")
     arg = pila_o.pop()
     tipo_arg = pila_tipos.pop()
+    # checa el tipo del parametro
     direccion = dir_funciones.comparar_parametro(pila_llam[-1][0], pila_llam[-1][1][0], tipo_arg)
     cuadruplos.append(['PARAM', arg, -1, direccion])
+    # registra el argumento llamado
     pila_llam[-1][1][0] += 1
 
 def p_cte(t):
@@ -642,6 +673,7 @@ def p_cte(t):
         | CTE_CAR p8_3
         | CTE_CADENA p8_4
     '''
+    # no hay constantes booleanas
     mem = dir_funciones.insertar_constante(pila_tipos[-1], t[1])
     pila_o.append(mem)
 
@@ -681,6 +713,7 @@ def p_p21(t):
     '''
     p21 : nulo
     '''
+    # datos para la formula de indexacion
     s3 = pila_o.pop()
     s3tipo = pila_tipos.pop()
     s2 = pila_o.pop()
@@ -694,6 +727,7 @@ def p_p21(t):
     if not all(tipo == 'ent' for tipo in [s1tipo, s2tipo, s3tipo]):
         raise Exception("Los tipos de indexacion no son enteros")
 
+    # formula de indexacion
     cuadruplos.append(['VERIFICAR', 0, dimensiones[0], s1]) 
     cuadruplos.append(['VERIFICAR', 0, dimensiones[1], s2])
     cuadruplos.append(['VERIFICAR', 0, dimensiones[2], s3])
@@ -714,6 +748,7 @@ def p_p22(t):
     '''
     p22 : nulo
     '''
+    # datos para la formula de indexacion
     s2 = pila_o.pop()
     s2tipo = pila_tipos.pop()
     s1 = pila_o.pop()
@@ -725,6 +760,7 @@ def p_p22(t):
     if not all(tipo == 'ent' for tipo in [s1tipo, s2tipo]):
         raise Exception("Los tipos de indexacion no son enteros")
 
+    # formula de indexacion
     cuadruplos.append(['VERIFICAR', 0, dimensiones[0], s1]) 
     cuadruplos.append(['VERIFICAR', 0, dimensiones[1], s2])
     temp1 = dir_funciones.insertar_variable(pila_func[-1], 'ent')
@@ -740,6 +776,7 @@ def p_p23(t):
     '''
     p23 : nulo
     '''
+    # datos para la formula de indexacion
     s1 = pila_o.pop()
     s1tipo = pila_tipos.pop()
     dirBase = dir_funciones.buscar_variable(pila_func[-1], t[-6])
@@ -748,6 +785,7 @@ def p_p23(t):
     if s1tipo != 'ent':
         raise Exception("El tipo de indexacion no es entero")
 
+    # formula de indexacion
     cuadruplos.append(['VERIFICAR', 0, dimensiones[0], s1])
     apt = dir_funciones.insertar_variable(pila_func[-1], 'apuntador')
     cuadruplos.append(['+dir', s1, dirBase, apt])

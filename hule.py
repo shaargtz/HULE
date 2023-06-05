@@ -1,8 +1,8 @@
 from src.hule_parser import parser, cuadruplos, dir_funciones
-from src.codigos_prueba import *
 from src.maquina_virtual import MaquinaVirtual
 from src.utilidad import *
 
+# interfaz simple para la interaccion del usuario en la terminal
 nombre_archivo = input('Escribe el nombre del archivo a correr: ')
 prueba = input("Es un archivo de prueba? [s]/n : ") or 's'
 debug = input("¿Quieres imprimir los datos de debug? s/[n] : ") or 'n'

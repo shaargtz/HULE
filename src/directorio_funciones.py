@@ -1,5 +1,8 @@
 from src.tabla_variables import Variables
  
+ # clase que almacena un diccionario con las distintas funciones y sus
+ # datos relevantes para la compilacion. es el principal objeto con el que
+ # interactua el parser para generar el codigo intermedio.
 class DirFunciones:
     def __init__(self):
         self.directorio = {
@@ -36,6 +39,7 @@ class DirFunciones:
             var = self.directorio[func][1].tabla['local'].get(id)
             if var:
                 return var[1]
+        # las variables pueden ser locales o globales
         if self.directorio['global'][1]:
             var = self.directorio['global'][1].tabla['glob'].get(id)
             if var:

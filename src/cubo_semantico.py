@@ -1,3 +1,6 @@
+# clase para comparar los tipos de expresiones escritas por el usuario en el codigo
+# self.cubo tiene todas las combinaciones validas de operador con operandos y su
+# tipo de retorno correspondiente
 class CuboSemantico:
     def __init__(self):
         self.cubo = {
@@ -47,6 +50,7 @@ class CuboSemantico:
             ('!=', 'bool', 'bool')      : 'bool',
         }
 
+    # funcion para retornar el tipo correspondiente para la expresion
     def emparejar_tipo(self, tupla):
         tipo = self.cubo.get(tupla)
         if tipo:

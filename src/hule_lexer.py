@@ -1,5 +1,8 @@
 from ply import lex
 
+# analisis lexico del lenguaje. estan los tokens y las regex necesarias
+# para leer el codigo y dar pie al analisis sintactico.
+
 tokens = [
     'IGUAL_QUE',
     'DIFERENTE_QUE',
@@ -61,11 +64,13 @@ t_CTE_FLOT = r'-?[0-9]+\.[0-9]+'
 
 def t_CTE_CAR(t):
     r'\'[^\']\''
+    # se quitan las comillas para el valor real del caracter
     t.value = t.value[1:-1]
     return t
 
 def t_CTE_CADENA(t):
     r'\'[^\']{2,}\''
+    # se quitan las comillas para el valor real de la cadena
     t.value = t.value[1:-1]
     return t
 
@@ -73,6 +78,7 @@ t_ignore = ' \t'
 
 def t_ID(t):
     r'[a-zA-Z_][a-zA-Z_0-9]*'
+    # checa que no sea una palabra reservada
     t.type = reserved.get(t.value,'ID')
     return t
 

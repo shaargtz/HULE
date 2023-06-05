@@ -1,5 +1,9 @@
 from src.dimensiones import Dimensiones
 
+# clase que almacena la tabla de variables, modelada en base al alcance que tiene.
+# se asigna el siguiente espacio de memoria de cada segmento por medio de un contador
+# que tambien nos puede dar la cantidad de variables en un segmento utilizando
+# la operacion modulo.
 class Variables:
     def __init__(self, alcance):
         # nombre : (tipo, direccion, dimensiones)
@@ -51,6 +55,8 @@ class Variables:
                 }
             }
 
+    # principal metodo para modificar el directorio. si no tiene nombre de variable es una temporal.
+    # si no tiene dimensiones es una variable simple.
     def insertar_variable(self, tipo, var=None, dims=None):
         if var:
             alcance = list(self.tabla.keys())[0]
@@ -58,6 +64,7 @@ class Variables:
                 self.tabla[alcance][var] = (tipo, self.contadores[alcance][tipo], Dimensiones(dims))
                 antes = self.contadores[alcance][tipo]
                 self.contadores[alcance][tipo] += self.tabla[alcance][var][2].total
+                # solo hay 1000 espacios para cada segmento
                 if antes // 1000 != self.contadores[alcance][tipo] // 1000:
                     raise Exception("Limite de memoria de tipo {} {} excedido".format(alcance, tipo))
                 return self.contadores[alcance][tipo] - 1
@@ -66,11 +73,13 @@ class Variables:
         else:
             if 'temp' not in self.tabla.keys():
                 raise Exception("No se pueden instertar temporales a una tabla global")
+            # nombres genericos para las temporales
             nueva_temp = tipo + str(self.contadores['temp'][tipo] % 1000)
             self.tabla['temp'][nueva_temp] = (tipo, self.contadores['temp'][tipo], Dimensiones(dims))
             self.contadores['temp'][tipo] += 1
             return self.contadores['temp'][tipo] - 1
         
+    # metodo para interactuar con la tabla de constantes
     def insertar_constante(self, tipo, cte):
         dir = self.tabla['ctes'].get(cte)
         if dir:
@@ -80,6 +89,7 @@ class Variables:
             self.contadores['ctes'][tipo] = self.contadores['ctes'][tipo] + 1
             return self.contadores['ctes'][tipo] - 1
         
+    # metodo para manejo de variables dimensionadas en compilacion
     def insertar_dimensiones(self, var, dims):
         alcance = list(self.tabla.keys())[0]
         if self.tabla[alcance].get(var):

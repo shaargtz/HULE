@@ -18,6 +18,7 @@ class MaquinaVirtual:
             operando_1 = self.cuadruplos[self.pila_apuntador[-1]][1]
             operando_2 = self.cuadruplos[self.pila_apuntador[-1]][2]
             destino = self.cuadruplos[self.pila_apuntador[-1]][3]
+            # estos tres operadores trabajan con apuntadores y se quiere el valor dentro del apuntador
             if operador not in ['+dir', '*dir', 'ERA']:
                 if operando_1 >= 15000 and operando_1 < 16000:
                     operando_1 = self.memoria.buscar_casilla(operando_1)
@@ -39,6 +40,7 @@ class MaquinaVirtual:
                     # print("{} / {} = ".format(operando_1, operando_2) + str(self.memoria.buscar_casilla(operando_1) / self.memoria.buscar_casilla(operando_2)))
                     self.memoria.asignar_casilla(destino, self.memoria.buscar_casilla(operando_1) / self.memoria.buscar_casilla(operando_2))
                 else:
+                    # division entera
                     # print("{} // {} = ".format(operando_1, operando_2) + str(self.memoria.buscar_casilla(operando_1) // self.memoria.buscar_casilla(operando_2)))
                     self.memoria.asignar_casilla(destino, self.memoria.buscar_casilla(operando_1) // self.memoria.buscar_casilla(operando_2))
             elif operador == '&':
@@ -93,6 +95,7 @@ class MaquinaVirtual:
                 # print("largo({}) = ".format(operando_1))
                 self.memoria.asignar_casilla(destino, operando_2)
             elif operador == 'media':
+                # calculo de la media
                 acum = 0
                 for i in range(operando_2):
                     acum += self.memoria.buscar_casilla(operando_1 + i)
@@ -100,6 +103,7 @@ class MaquinaVirtual:
                 # print("media de la lista {} = {}".format(operando_1, media))
                 self.memoria.asignar_casilla(destino, media)
             elif operador == 'moda':
+                # calculo de la moda
                 valores = {}
                 for i in range(operando_2):
                     val = self.memoria.buscar_casilla(operando_1 + i)
@@ -111,6 +115,7 @@ class MaquinaVirtual:
                 # print("moda de la lista {} = {}".format(operando_1, max_key))
                 self.memoria.asignar_casilla(destino, max_key)
             elif operador == 'mediana':
+                # calculo de la mediana
                 valores = []
                 for i in range(operando_2):
                     valores.append(self.memoria.buscar_casilla(operando_1 + i))
@@ -158,10 +163,12 @@ class MaquinaVirtual:
                     raise Exception("Rango de indexacion invalido {} <= {} <= {}".format(operando_1, aux, operando_2))
             elif operador == '+dir':
                 if operando_1 >= 15000 and operando_1 < 16000:
+                    # es un apuntador
                     operando_1 = self.memoria.buscar_casilla(operando_1)
                 # print("{} +dir {} = ".format(self.memoria.buscar_casilla(operando_1), operando_2) + str(self.memoria.buscar_casilla(operando_1) + operando_2))
                 self.memoria.asignar_casilla(destino, self.memoria.buscar_casilla(operando_1) + operando_2)
             elif operador == '*dir':
+                # es un apuntador
                 if operando_1 >= 15000 and operando_1 < 16000:
                     operando_1 = self.memoria.buscar_casilla(operando_1)
                 # print("{} *dir {} = ".format(self.memoria.buscar_casilla(operando_1), operando_2) + str(self.memoria.buscar_casilla(operando_1) + operando_2))
@@ -185,6 +192,7 @@ class MaquinaVirtual:
                 # print("REGRESA {} {}".format(operando_1, destino))
                 self.memoria.asignar_casilla(destino, self.memoria.buscar_casilla(operando_1))
             elif operador == 'INSTANCIAR':
+                # se pasa la memoria de compilacion a la memoria de ejecucion
                 # print("INSTANCIAR")
                 self.memoria.instanciar('hule', self.dir_func.buscar_contadores_var('hule'))
                 self.memoria.instanciar('global', self.dir_func.buscar_contadores_var('global'))
@@ -205,26 +213,31 @@ class MaquinaVirtual:
                 aux = input()
                 self.memoria.asignar_casilla(destino, aux)
             elif operador == 'ent':
+                # conversion de datos
                 # print("ent({})".format(operando_1))
                 valor = self.memoria.buscar_casilla(operando_1)
                 conversion = int(valor)
                 self.memoria.asignar_casilla(destino, conversion)
             elif operador == 'flot':
+                # conversion de datos
                 # print("flot({})".format(operando_1))
                 valor = self.memoria.buscar_casilla(operando_1)
                 conversion = float(valor)
                 self.memoria.asignar_casilla(destino, conversion)
             elif operador == 'car':
+                # conversion de datos
                 # print("car({})".format(operando_1))
                 valor = self.memoria.buscar_casilla(operando_1)
                 conversion = chr(valor)
                 self.memoria.asignar_casilla(destino, conversion)
             elif operador == 'cadena':
+                # conversion de datos
                 # print("cadena({})".format(operando_1))
                 valor = self.memoria.buscar_casilla(operando_1)
                 conversion = str(valor)
                 self.memoria.asignar_casilla(destino, conversion)
             elif operador == 'bool':
+                # conversion de datos
                 # print("bool({})".format(operando_1))
                 valor = self.memoria.buscar_casilla(operando_1)
                 conversion = bool(valor)

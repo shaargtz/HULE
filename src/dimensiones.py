@@ -1,3 +1,6 @@
+# clase para almacenar los datos relevantes sobre las dimensiones
+# en variables estructuradas. almacena la cantidad espacios de 
+# memoria utilizados asi como valores para la formula de indexacion
 class Dimensiones:
     def __init__(self, dims):
         self.total = 1
