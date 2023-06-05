@@ -7,6 +7,7 @@ Con clonar el repositorio es suficiente, ya que viene la libreria de PLY integra
 <br> Se requiere instalar plotext con `pip install plotext`
 
 ## Ejecucion
+Se debe guardar el codigo `.hule` en este mismo folder. <br>
 Para ejecutarlo solo se debe correr `python3 hule.py` y seguir las instrucciones.
 
 ## Ejemplos de codigo
